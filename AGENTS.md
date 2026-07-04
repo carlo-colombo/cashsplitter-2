@@ -30,10 +30,12 @@ Tasks live in the `tasks/` directory:
 ### Instructions for agents
 
 1. **Start a task**: Move the task file from `tasks/TODO/` to `tasks/in-progress/`.
-2. **Complete a task**: Move the file from `tasks/in-progress/` to `tasks/Done/`.
-3. When picking a new task, respect the **dependency order** (see plan below). A task should not be started until all its dependencies are in `tasks/Done/`.
-4. If a task turns out to be larger than expected, split it into subtasks and create new ticket files in `tasks/TODO/`.
-5. If priorities change, update the task files accordingly.
+2. **Work the task**: Implement the code for that task.
+3. **Demo after each task**: After completing a task, demonstrate the change to the user before moving to the next one. Show what was built, how it works, and confirm it meets expectations.
+4. **Complete a task**: Once the demo is approved, move the file from `tasks/in-progress/` to `tasks/Done/`.
+5. **Pick next task**: Only start a new task when the previous one is in `tasks/Done/`. Respect the **dependency order** (see plan below) — a task should not be started until all its dependencies are in `tasks/Done/`.
+6. If a task turns out to be larger than expected, split it into subtasks and create new ticket files in `tasks/TODO/`.
+7. If priorities change, update the task files accordingly.
 
 ---
 
@@ -100,8 +102,15 @@ Tasks live in the `tasks/` directory:
 - **Shares (ratios)**: e.g. `{Carlo: 2, Fra: 1, Diego: 1}` → proportional split
 - **Custom**: explicit amounts per person (must sum to total)
 
-### Views are HTML fragments
-The SW returns **HTML strings** directly (not JSON). HTMX swaps these into the DOM. No client-side templates needed.
+### Views are HTML templates
+The SW returns **HTML strings** (not JSON). HTMX swaps these into the DOM.
+
+HTML fragments are **not** built via string concatenation. Instead, the `.html.hx` files in `src/views/` are real template files containing `{{placeholder}}` syntax. A `src/lib/template.js` module provides a `render(template, data)` function that:
+- Replaces `{{key}}` with values from the data object
+- Supports `{{#each items}}...{{/each}}` for loops
+- Supports `{{#if condition}}...{{/if}}` for conditionals
+
+The SW loads these template files at install time (cached), and API handlers call `render(templateName, data)` to produce responses. No manual HTML string concatenation anywhere.
 
 ### Settlements
 Default view shows raw balances (who owes whom what). A toggle switches to **optimized settlements** (minimal number of transactions, computed via greedy match).
@@ -134,7 +143,8 @@ cashsplitter/
 │   │   ├── store.js
 │   │   └── events.js
 │   ├── lib/
-│   │   └── split.js
+│   │   ├── split.js
+│   │   └── template.js
 │   └── views/
 │       ├── groups-list.html.hx
 │       ├── group-detail.html.hx

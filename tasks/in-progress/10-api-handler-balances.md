@@ -12,14 +12,14 @@ Create `src/api/balances.js` — handlers for computing and displaying balances 
 
 - [ ] `GET /api/groups/:id/balances` — raw balances
   - Project state, compute net per-person balances
-  - Render HTML table: who is owed money (positive) and who owes (negative)
+  - Call `render('settlements', { balances, mode: 'raw' })` for HTML output
   - Include toggle button to switch to optimized view
 - [ ] `GET /api/groups/:id/settlements` — optimized settlements
   - Compute minimal set of transactions to settle all debts
-  - Render HTML showing "X pays Y amount Z" instructions
+  - Call `render('settlements', { settlements, mode: 'optimized' })` for HTML output
   - Include toggle button to switch back to raw balances
 - [ ] Optimized settlement algorithm: greedy approach matching highest creditor with highest debtor
-- [ ] Return HTML fragments for HTMX swap
+- [ ] No manual HTML string concatenation — always use the template renderer
 
 ## Acceptance criteria
 

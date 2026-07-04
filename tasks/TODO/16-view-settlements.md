@@ -6,22 +6,27 @@
 
 ## Description
 
-Create `src/views/settlements.html.hx` — view showing both raw balances and optimized settlements with a toggle.
+Create `src/views/settlements.html.hx` — the settlements template processed by `src/lib/template.js`.
+
+Use `{{placeholder}}` syntax. The data object will have:
+- `mode` — `'raw'` or `'optimized'`
+- `balances` — array of `{ name, paid, spent, netAmount }` (for raw mode)
+- `settlements` — array of `{ from, to, amount }` (for optimized mode)
+- `groupId` — string
+- `allSettled` — boolean
 
 ## Tasks
 
-- [ ] **Raw balances view** (default):
+- [ ] `{{#if allSettled}}` block: "All settled up!" message
+- [ ] **Raw balances view** (`{{#if equal mode 'raw'}}`):
   - Table: Member | Paid | Spent | Balance
-  - Positive balance = is owed money (green)
-  - Negative balance = owes money (red)
-- [ ] **Optimized settlements view**:
-  - List of "X pays Y $Z" instructions
+  - Positive balance green, negative red
+- [ ] **Optimized settlements view** (`{{#if equal mode 'optimized'}}`):
+  - `{{#each settlements}}` — "{{from}} pays {{to}} ${{amount}}"
   - Minimal number of transactions
-- [ ] Toggle button/switch between the two views using HTMX:
-  - Button uses `hx-get="/api/groups/:id/settlements"` with `hx-swap="outerHTML"`
-  - Or separate endpoints with HTMX swap
-- [ ] "All settled up!" empty state when everyone is at zero
-- [ ] Back to group detail link
+- [ ] Toggle button: `hx-get="/api/groups/{{groupId}}/settlements?mode=optimized"` (or raw)
+- [ ] Back to group detail link: `/api/groups/{{groupId}}`
+- [ ] **No manual HTML string concatenation** — pure template file
 
 ## Acceptance criteria
 

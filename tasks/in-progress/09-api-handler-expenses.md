@@ -15,9 +15,10 @@ Create `src/api/expenses.js` — handlers for adding expenses to a group.
   - Validate: description required, total > 0, at least one payer, valid split strategy
   - Use split engine to compute per-person amounts
   - Create and store `EXPENSE_ADDED` event
-  - Return updated group detail HTML
-- [ ] `GET .../expenses` (if needed) — list expenses for a group
+  - Return updated group detail HTML via `render('group-detail', data)`
+- [ ] `GET .../expenses` (if needed) — list expenses for a group (via template)
 - [ ] Include payer selection and split strategy inputs in the form rendering
+- [ ] No manual HTML string concatenation — always use the template renderer
 
 ## Acceptance criteria
 

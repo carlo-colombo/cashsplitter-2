@@ -6,16 +6,20 @@
 
 ## Description
 
-Create `src/views/member-form.html.hx` — a simple inline form for adding members to a group.
+Create `src/views/member-form.html.hx` — the member form template processed by `src/lib/template.js`.
+
+Use `{{placeholder}}` syntax. The data object will have:
+- `groupId` — string
+- `errors` — optional object with field error messages
 
 ## Tasks
 
 - [ ] Single field: member name (text input, required)
-- [ ] Submit button with `hx-post="/api/groups/:id/members"`
-- [ ] Validation: name is not empty, no duplicate names in group
-- [ ] Error message display (e.g. "Member already exists")
+- [ ] `{{#if errors.name}}` for inline error display
+- [ ] Submit button with `hx-post="/api/groups/{{groupId}}/members"`
 - [ ] Cancel/close button to hide the form
 - [ ] After successful submission, form is replaced with updated member list
+- [ ] **No manual HTML string concatenation** — pure template file
 
 ## Acceptance criteria
 

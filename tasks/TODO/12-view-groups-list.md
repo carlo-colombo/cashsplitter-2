@@ -6,16 +6,21 @@
 
 ## Description
 
-Create `src/views/groups-list.html.hx` — the HTML fragment returned by the groups handler for the groups listing.
+Create `src/views/groups-list.html.hx` — the HTML template processed by `src/lib/template.js`.
+
+Use `{{placeholder}}` syntax for dynamic data. The data object passed to `render()` will have:
+- `groups` — array of `{ id, name }`
+- `empty` — boolean (true when no groups exist)
 
 ## Tasks
 
-- [ ] Render a list of groups as cards/rows with group name and link to detail
-- [ ] Each group links to `/api/groups/{id}` (HTMX `hx-get` swap)
-- [ ] Empty state: "No groups yet" message with a create button
+- [ ] Template uses `{{#each groups}}...{{/each}}` to render the group list
+- [ ] Each group links to `/api/groups/{{id}}` (HTMX `hx-get` swap)
+- [ ] `{{#if empty}}` block: "No groups yet" message with create button
 - [ ] "Create Group" inline form (name input + submit button)
 - [ ] Form uses `hx-post="/api/groups"` with `hx-target="closest ul"` or similar swap
 - [ ] Styled with CSS classes (mobile-first card layout)
+- [ ] **No manual HTML string concatenation** — this is a pure template file
 
 ## Acceptance criteria
 
