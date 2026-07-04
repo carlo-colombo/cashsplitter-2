@@ -1,0 +1,13 @@
+{
+  "name": "cashsplitter",
+  "version": "1.0.0",
+  "description": "Mobile-first PWA for splitting expenses among groups",
+  "private": true,
+  "scripts": {
+    "test": "npx playwright test",
+    "test:ui": "npx playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0"
+  }
+}
