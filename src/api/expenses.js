@@ -1,6 +1,8 @@
 import { addEvent, getAllEvents } from '../db/store.js'
 import { projectState, createEvent, EXPENSE_ADDED } from '../db/events.js'
 import { splitEqual, splitByShares, splitCustom, validateCustomTotal } from '../lib/split.js'
+import { renderExpenseForm } from '../views/expense-form.html.hx.js'
+import { renderGroupDetail } from '../views/group-detail.html.hx.js'
 
 export async function form(params, _request) {
   const groupId = params.id
@@ -8,7 +10,6 @@ export async function form(params, _request) {
   const state = projectState(events)
   const members = state.members[groupId] || []
 
-  const { renderExpenseForm } = await import('../views/expense-form.html.hx.js')
   const html = renderExpenseForm(groupId, members)
   return new Response(html, {
     headers: { 'Content-Type': 'text/html; charset=utf-8' },
@@ -107,7 +108,6 @@ export async function add(params, request) {
   const updatedEvents = await getAllEvents()
   const updatedState = projectState(updatedEvents)
 
-  const { renderGroupDetail } = await import('../views/group-detail.html.hx.js')
   const html = renderGroupDetail(
     updatedState.groups[groupId],
     updatedState.members[groupId] || [],

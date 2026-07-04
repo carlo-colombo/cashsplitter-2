@@ -1,3 +1,5 @@
+import { handleRequest } from './src/api/router.js'
+
 const CACHE_NAME = 'cashsplitter-static-v1'
 const STATIC_ASSETS = [
   '/',
@@ -13,11 +15,12 @@ const STATIC_ASSETS = [
   '/src/db/store.js',
   '/src/db/events.js',
   '/src/lib/split.js',
-  '/src/views/groups-list.html.hx',
-  '/src/views/group-detail.html.hx',
-  '/src/views/expense-form.html.hx',
-  '/src/views/member-form.html.hx',
-  '/src/views/settlements.html.hx',
+  '/src/views/groups-list.html.hx.js',
+  '/src/views/group-detail.html.hx.js',
+  '/src/views/expense-form.html.hx.js',
+  '/src/views/member-form.html.hx.js',
+  '/src/views/settlements.html.hx.js',
+  '/icon.svg',
 ]
 
 self.addEventListener('install', (event) => {
@@ -52,8 +55,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       (async () => {
         try {
-          const mod = await import('./src/api/router.js')
-          return await mod.handleRequest(request)
+          return await handleRequest(request)
         } catch (err) {
           console.error('Router error:', err)
           return new Response(`<div class="error">Router error: ${err.message}</div>`, {

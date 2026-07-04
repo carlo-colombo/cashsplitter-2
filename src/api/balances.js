@@ -1,5 +1,6 @@
 import { getAllEvents } from '../db/store.js'
 import { projectState } from '../db/events.js'
+import { renderBalances, renderSettlements } from '../views/settlements.html.hx.js'
 
 function computeSettlements(balances) {
   const creditors = []
@@ -52,7 +53,6 @@ export async function get(params, _request) {
   const balances = state.balances[groupId] || {}
   const members = (state.members[groupId] || []).map((m) => ({ ...m, groupId }))
 
-  const { renderBalances } = await import('../views/settlements.html.hx.js')
   const html = renderBalances(balances, members)
   return new Response(html, {
     headers: { 'Content-Type': 'text/html; charset=utf-8' },
@@ -74,7 +74,6 @@ export async function settlements(params, _request) {
   const balances = state.balances[groupId] || {}
   const members = (state.members[groupId] || []).map((m) => ({ ...m, groupId }))
 
-  const { renderSettlements } = await import('../views/settlements.html.hx.js')
   const settlementsList = computeSettlements(balances)
   const html = renderSettlements(settlementsList, members)
   return new Response(html, {

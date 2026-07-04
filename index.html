@@ -2,10 +2,40 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1a8c4e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CashSplitter">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="stylesheet" href="/styles/app.css">
   <title>CashSplitter</title>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 <body>
-  <h1>CashSplitter</h1>
+  <header class="app-header">
+    <h1 class="app-title">CashSplitter</h1>
+  </header>
+
+  <main id="main-content" hx-get="/api/groups" hx-trigger="load" hx-target="this">
+    <div class="loading-indicator">Loading...</div>
+  </main>
+
+  <noscript>
+    <div class="noscript-warning">
+      CashSplitter requires JavaScript to function. Please enable JavaScript in your browser.
+    </div>
+  </noscript>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { type: 'module' }).catch((err) => {
+          console.error('SW registration failed:', err)
+        })
+      })
+    }
+  </script>
 </body>
 </html>

@@ -1,0 +1,21 @@
+import { defineConfig } from '@playwright/test'
+
+export default defineConfig({
+  testDir: '.',
+  timeout: 60000,
+  expect: { timeout: 10000 },
+  fullyParallel: false,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 1 : 0,
+  workers: 1,
+  use: {
+    baseURL: 'http://localhost:3333',
+    trace: 'on-first-retry',
+  },
+  webServer: {
+    command: 'npx serve . -p 3333 --single',
+    port: 3333,
+    reuseExistingServer: true,
+    timeout: 10000,
+  },
+})

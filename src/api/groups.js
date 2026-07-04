@@ -1,6 +1,7 @@
 import { addEvent, getAllEvents } from '../db/store.js'
 import { projectState, createEvent, GROUP_CREATED } from '../db/events.js'
 import { renderGroupsList } from '../views/groups-list.html.hx.js'
+import { renderGroupDetail } from '../views/group-detail.html.hx.js'
 
 export async function list(_params, _request) {
   const events = await getAllEvents()
@@ -26,9 +27,17 @@ export async function create(_params, request) {
   const event = createEvent(GROUP_CREATED, { id, name })
   await addEvent(event)
 
-  return new Response(null, {
-    status: 303,
-    headers: { Location: `/api/groups/${id}` },
+  const allEvents = await getAllEvents()
+  const state = projectState(allEvents)
+  const group = state.groups[id]
+  const html = renderGroupDetail(group, [], [], {})
+
+  return new Response(html, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'HX-Push-Url': `/api/groups/${id}`,
+    },
   })
 }
 
@@ -49,7 +58,6 @@ export async function detail(params, _request) {
   const expenses = state.expenses[groupId] || []
   const balances = state.balances[groupId] || {}
 
-  const { renderGroupDetail } = await import('../views/group-detail.html.hx.js')
   const html = renderGroupDetail(group, members, expenses, balances)
   return new Response(html, {
     headers: { 'Content-Type': 'text/html; charset=utf-8' },
