@@ -1,14 +1,16 @@
+import { p } from '../lib/config.js'
+
 export function renderMemberForm(groupId) {
   let html = '<div class="member-form">'
   html += '<h3>Add Member</h3>'
-  html += `<form hx-post="/api/groups/${escapeHtml(groupId)}/members" hx-target="#group-detail-area" hx-swap="outerHTML">`
+  html += `<form hx-post="${p('/api/groups/' + escapeHtml(groupId) + '/members')}" hx-target="#group-detail-area" hx-swap="outerHTML">`
   html += '<div class="form-field">'
   html += '<label for="member-name">Name</label>'
   html += '<input type="text" id="member-name" name="name" required>'
   html += '</div>'
   html += '<div class="form-actions">'
   html += '<button type="submit" class="btn btn-primary">Add</button>'
-  html += `<button type="button" class="btn btn-secondary" hx-get="/api/groups/${escapeHtml(groupId)}" hx-target="#group-detail-area" hx-swap="outerHTML">Cancel</button>`
+  html += `<button type="button" class="btn btn-secondary" hx-get="${p('/api/groups/' + escapeHtml(groupId))}" hx-target="#group-detail-area" hx-swap="outerHTML">Cancel</button>`
   html += '</div>'
   html += '</form>'
   html += '</div>'

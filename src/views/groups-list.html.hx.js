@@ -1,3 +1,5 @@
+import { p } from '../lib/config.js'
+
 export function renderGroupsList(groups) {
   const groupIds = Object.keys(groups)
 
@@ -5,7 +7,7 @@ export function renderGroupsList(groups) {
 
   html += '<div class="create-group-form">'
   html += '<h2>Create Group</h2>'
-  html += '<form hx-post="/api/groups" hx-target="#main-content" hx-swap="innerHTML">'
+  html += `<form hx-post="${p('/api/groups')}" hx-target="#main-content" hx-swap="innerHTML">`
   html += '<input type="text" name="name" placeholder="Group name" required minlength="1">'
   html += '<button type="submit" class="btn btn-primary">Create</button>'
   html += '</form>'
@@ -20,7 +22,7 @@ export function renderGroupsList(groups) {
     for (const id of groupIds) {
       const g = groups[id]
       html += `<div class="group-card">`
-      html += `<h3><a href="#/groups/${escapeHtml(id)}" hx-get="/api/groups/${escapeHtml(id)}" hx-target="#main-content" hx-push-url="/#/groups/${escapeHtml(id)}">${escapeHtml(g.name)}</a></h3>`
+      html += `<h3><a href="#/groups/${escapeHtml(id)}" hx-get="${p('/api/groups/' + escapeHtml(id))}" hx-target="#main-content" hx-push-url="/#/groups/${escapeHtml(id)}">${escapeHtml(g.name)}</a></h3>`
       html += '</div>'
     }
     html += '</div>'

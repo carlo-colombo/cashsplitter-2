@@ -2,13 +2,13 @@
   "name": "CashSplitter",
   "short_name": "CashSplitter",
   "description": "Split expenses among friends and groups",
-  "start_url": "/",
+  "start_url": "/cashsplitter-2/",
   "display": "standalone",
   "background_color": "#f0f2f5",
   "theme_color": "#1a8c4e",
   "icons": [
     {
-      "src": "/icon.svg",
+      "src": "/cashsplitter-2/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"

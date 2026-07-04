@@ -1,3 +1,5 @@
+import { p } from '../lib/config.js'
+
 export function renderGroupDetail(group, members, expenses, balances) {
   let html = '<div id="group-detail-area">'
   html += '<div class="group-detail">'
@@ -5,13 +7,13 @@ export function renderGroupDetail(group, members, expenses, balances) {
   html += `<header class="group-header">`
   html += `<h2>${escapeHtml(group.name)}</h2>`
   html += `<p class="member-count">${members.length} member${members.length !== 1 ? 's' : ''}</p>`
-  html += `<a href="#/" class="back-link" hx-get="/api/groups" hx-target="#main-content" hx-push-url="/#/">&larr; Back</a>`
+  html += `<a href="#/" class="back-link" hx-get="${p('/api/groups')}" hx-target="#main-content" hx-push-url="/#/">&larr; Back</a>`
   html += `</header>`
 
   html += `<nav class="group-actions">`
-  html += `<button class="btn btn-primary" hx-get="/api/groups/${escapeHtml(group.id)}/members/form" hx-target="#member-form-area" hx-swap="innerHTML">Add Member</button>`
-  html += `<button class="btn btn-primary" hx-get="/api/groups/${escapeHtml(group.id)}/expenses/form" hx-target="#expense-form-area" hx-swap="innerHTML">Add Expense</button>`
-  html += `<button class="btn btn-secondary" hx-get="/api/groups/${escapeHtml(group.id)}/balances" hx-target="#balances-container" hx-swap="innerHTML">Balances</button>`
+  html += `<button class="btn btn-primary" hx-get="${p('/api/groups/' + escapeHtml(group.id) + '/members/form')}" hx-target="#member-form-area" hx-swap="innerHTML">Add Member</button>`
+  html += `<button class="btn btn-primary" hx-get="${p('/api/groups/' + escapeHtml(group.id) + '/expenses/form')}" hx-target="#expense-form-area" hx-swap="innerHTML">Add Expense</button>`
+  html += `<button class="btn btn-secondary" hx-get="${p('/api/groups/' + escapeHtml(group.id) + '/balances')}" hx-target="#balances-container" hx-swap="innerHTML">Balances</button>`
   html += `</nav>`
 
   html += '<div id="member-form-area"></div>'

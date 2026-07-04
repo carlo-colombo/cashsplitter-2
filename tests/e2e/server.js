@@ -17,6 +17,7 @@ const MIME = {
 
 http.createServer((req, res) => {
   let urlPath = req.url === '/' ? '/index.html' : req.url
+  urlPath = urlPath.replace(/^\/cashsplitter-2/, '') || '/'
   let filePath = path.join(root, urlPath)
 
   fs.readFile(filePath, (err, data) => {

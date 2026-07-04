@@ -1,27 +1,29 @@
+import { BASE_PATH, p } from './src/lib/config.js'
 import { handleRequest } from './src/api/router.js'
 
 const CACHE_NAME = 'cashsplitter-static-v1'
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/404.html',
-  '/styles/app.css',
-  '/manifest.json',
-  '/sw.js',
-  '/src/api/router.js',
-  '/src/api/groups.js',
-  '/src/api/members.js',
-  '/src/api/expenses.js',
-  '/src/api/balances.js',
-  '/src/db/store.js',
-  '/src/db/events.js',
-  '/src/lib/split.js',
-  '/src/views/groups-list.html.hx.js',
-  '/src/views/group-detail.html.hx.js',
-  '/src/views/expense-form.html.hx.js',
-  '/src/views/member-form.html.hx.js',
-  '/src/views/settlements.html.hx.js',
-  '/icon.svg',
+  p('/'),
+  p('/index.html'),
+  p('/404.html'),
+  p('/styles/app.css'),
+  p('/manifest.json'),
+  p('/sw.js'),
+  p('/src/api/router.js'),
+  p('/src/api/groups.js'),
+  p('/src/api/members.js'),
+  p('/src/api/expenses.js'),
+  p('/src/api/balances.js'),
+  p('/src/db/store.js'),
+  p('/src/db/events.js'),
+  p('/src/lib/config.js'),
+  p('/src/lib/split.js'),
+  p('/src/views/groups-list.html.hx.js'),
+  p('/src/views/group-detail.html.hx.js'),
+  p('/src/views/expense-form.html.hx.js'),
+  p('/src/views/member-form.html.hx.js'),
+  p('/src/views/settlements.html.hx.js'),
+  p('/icon.svg'),
 ]
 
 self.addEventListener('install', (event) => {
@@ -59,7 +61,7 @@ async function serveOfflineFallback(request) {
 
   if (isNav) {
     const cache = await caches.open(CACHE_NAME)
-    const cached = await cache.match('/index.html')
+    const cached = await cache.match(p('/index.html'))
     if (cached) return cached
     return new Response(
       '<html><body><h1>Offline</h1><p>CashSplitter is offline.</p></body></html>',
@@ -72,7 +74,7 @@ async function serveOfflineFallback(request) {
   }
 
   const cache = await caches.open(CACHE_NAME)
-  const cached = await cache.match('/index.html')
+  const cached = await cache.match(p('/index.html'))
   if (cached) return cached
   return new Response('Offline', { status: 503 })
 }
@@ -81,7 +83,7 @@ self.addEventListener('fetch', (event) => {
   const request = event.request
   const url = new URL(request.url)
 
-  if (url.pathname.startsWith('/api/')) {
+  if (url.pathname.startsWith(BASE_PATH + '/api/')) {
     event.respondWith(
       (async () => {
         try {
@@ -101,13 +103,13 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     (async () => {
       if (isNavigationRequest(request)) {
-        const cached = await caches.match('/index.html')
+        const cached = await caches.match(p('/index.html'))
         if (cached) return cached
         try {
           const response = await fetch(request)
           if (response.ok) {
             const cache = await caches.open(CACHE_NAME)
-            cache.put('/index.html', response.clone())
+            cache.put(p('/index.html'), response.clone())
           }
           return response
         } catch {

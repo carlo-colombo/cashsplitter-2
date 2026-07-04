@@ -1,7 +1,9 @@
+import { p } from '../lib/config.js'
+
 export function renderExpenseForm(groupId, members) {
   let html = '<div class="expense-form">'
   html += '<h3>Add Expense</h3>'
-  html += `<form hx-post="/api/groups/${escapeHtml(groupId)}/expenses" hx-target="#group-detail-area" hx-swap="outerHTML">`
+  html += `<form hx-post="${p('/api/groups/' + escapeHtml(groupId) + '/expenses')}" hx-target="#group-detail-area" hx-swap="outerHTML">`
 
   html += '<div class="form-field">'
   html += '<label for="description">Description</label>'
@@ -36,7 +38,7 @@ export function renderExpenseForm(groupId, members) {
 
   html += '<div class="form-actions">'
   html += '<button type="submit" class="btn btn-primary">Add Expense</button>'
-  html += `<button type="button" class="btn btn-secondary" hx-get="/api/groups/${escapeHtml(groupId)}" hx-target="#group-detail-area" hx-swap="outerHTML">Cancel</button>`
+  html += `<button type="button" class="btn btn-secondary" hx-get="${p('/api/groups/' + escapeHtml(groupId))}" hx-target="#group-detail-area" hx-swap="outerHTML">Cancel</button>`
   html += '</div>'
 
   html += '</form>'

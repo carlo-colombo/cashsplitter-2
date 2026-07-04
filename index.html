@@ -7,13 +7,14 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="CashSplitter">
-  <link rel="manifest" href="/manifest.json">
-  <link rel="apple-touch-icon" href="/icon.svg">
-  <link rel="stylesheet" href="/styles/app.css">
+  <base href="/cashsplitter-2/">
+  <link rel="manifest" href="/cashsplitter-2/manifest.json">
+  <link rel="apple-touch-icon" href="/cashsplitter-2/icon.svg">
+  <link rel="stylesheet" href="/cashsplitter-2/styles/app.css">
   <title>CashSplitter</title>
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js', { type: 'module' }).catch((err) => {
+      navigator.serviceWorker.register('/cashsplitter-2/sw.js', { type: 'module' }).catch((err) => {
         console.error('SW registration failed:', err)
       })
     }
@@ -24,13 +25,13 @@
       const path = hash.replace(/^#/, '') || '/'
       let url
       if (path === '/' || path === '') {
-        url = '/api/groups'
+        url = '/cashsplitter-2/api/groups'
       } else {
         const match = path.match(/^\/groups\/(.+)$/)
         if (match) {
-          url = '/api/groups/' + encodeURIComponent(match[1])
+          url = '/cashsplitter-2/api/groups/' + encodeURIComponent(match[1])
         } else {
-          url = '/api/groups'
+          url = '/cashsplitter-2/api/groups'
         }
       }
       if (typeof htmx !== 'undefined') {
