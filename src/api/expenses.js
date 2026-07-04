@@ -30,7 +30,7 @@ export async function add(params, request) {
 
   const form = await request.formData()
   const description = form.get('description')?.trim()
-  const total = parseFloat(form.get('total'))
+  const totalCents = Math.round(parseFloat(form.get('total')) * 100)
   const paidBy = form.get('paidBy')
   const strategy = form.get('splitStrategy')
 
@@ -41,7 +41,7 @@ export async function add(params, request) {
     )
   }
 
-  if (!total || total <= 0) {
+  if (!totalCents || totalCents <= 0) {
     return new Response(
       '<div class="error">Total must be greater than 0</div>',
       { status: 400, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
@@ -65,21 +65,21 @@ export async function add(params, request) {
 
   let split
   if (strategy === 'equal') {
-    split = splitEqual(total, members.map((m) => m.id))
+    split = splitEqual(totalCents, members.map((m) => m.id))
   } else if (strategy === 'shares') {
     const shares = {}
     for (const member of members) {
       const val = parseFloat(form.get(`shares_${member.id}`))
       shares[member.id] = val > 0 ? val : 1
     }
-    split = splitByShares(total, shares)
+    split = splitByShares(totalCents, shares)
   } else if (strategy === 'custom') {
     const amounts = {}
     for (const member of members) {
       const val = parseFloat(form.get(`amount_${member.id}`))
-      amounts[member.id] = isNaN(val) ? 0 : val
+      amounts[member.id] = isNaN(val) ? 0 : Math.round(val * 100)
     }
-    if (!validateCustomTotal(amounts, total)) {
+    if (!validateCustomTotal(amounts, totalCents)) {
       return new Response(
         '<div class="error">Custom amounts must sum to the total</div>',
         { status: 400, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
@@ -98,7 +98,7 @@ export async function add(params, request) {
     groupId,
     id,
     description,
-    total,
+    total: totalCents,
     paidBy,
     split,
     strategy,

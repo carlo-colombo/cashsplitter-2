@@ -4,6 +4,7 @@ const CACHE_NAME = 'cashsplitter-static-v1'
 const STATIC_ASSETS = [
   '/',
   '/index.html',
+  '/404.html',
   '/styles/app.css',
   '/manifest.json',
   '/sw.js',

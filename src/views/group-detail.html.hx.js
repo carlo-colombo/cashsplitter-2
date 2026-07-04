@@ -5,7 +5,7 @@ export function renderGroupDetail(group, members, expenses, balances) {
   html += `<header class="group-header">`
   html += `<h2>${escapeHtml(group.name)}</h2>`
   html += `<p class="member-count">${members.length} member${members.length !== 1 ? 's' : ''}</p>`
-  html += `<a href="#" class="back-link" hx-get="/api/groups" hx-target="#main-content" hx-push-url="true">&larr; Back</a>`
+  html += `<a href="#/" class="back-link" hx-get="/api/groups" hx-target="#main-content" hx-push-url="/#/">&larr; Back</a>`
   html += `</header>`
 
   html += `<nav class="group-actions">`
@@ -39,7 +39,7 @@ export function renderGroupDetail(group, members, expenses, balances) {
     for (const e of expenses) {
       const payer = members.find((m) => m.id === e.paidBy)
       const payerName = payer ? payer.name : e.paidBy
-      html += `<li><strong>${escapeHtml(e.description)}</strong> — €${e.total.toFixed(2)} paid by ${escapeHtml(payerName)}</li>`
+      html += `<li><strong>${escapeHtml(e.description)}</strong> — €${(e.total / 100).toFixed(2)} paid by ${escapeHtml(payerName)}</li>`
     }
     html += '</ul>'
   }
@@ -47,7 +47,7 @@ export function renderGroupDetail(group, members, expenses, balances) {
 
   html += '<section class="balances-section">'
   html += '<h3>Balance Snapshot</h3>'
-  const hasBalances = Object.values(balances).some((b) => Math.abs(b) > 0.01)
+  const hasBalances = Object.values(balances).some((b) => Math.abs(b) >= 1)
   if (!hasBalances) {
     html += '<p class="settled">All settled up!</p>'
   } else {
@@ -57,7 +57,7 @@ export function renderGroupDetail(group, members, expenses, balances) {
       const name = member ? member.name : userId
       const cls = net >= 0 ? 'positive' : 'negative'
       const label = net >= 0 ? 'is owed' : 'owes'
-      html += `<li class="${cls}">${escapeHtml(name)} ${label} €${Math.abs(net).toFixed(2)}</li>`
+      html += `<li class="${cls}">${escapeHtml(name)} ${label} €${(Math.abs(net) / 100).toFixed(2)}</li>`
     }
     html += '</ul>'
   }

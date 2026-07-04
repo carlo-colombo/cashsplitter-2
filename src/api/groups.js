@@ -36,7 +36,7 @@ export async function create(_params, request) {
     status: 200,
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
-      'HX-Push-Url': `/api/groups/${id}`,
+      'HX-Push-Url': `/#/groups/${id}`,
     },
   })
 }

@@ -7,9 +7,8 @@ function computeSettlements(balances) {
   const debtors = []
 
   for (const [userId, net] of Object.entries(balances)) {
-    const rounded = Math.round(net * 100) / 100
-    if (rounded > 0.01) creditors.push({ userId, amount: rounded })
-    else if (rounded < -0.01) debtors.push({ userId, amount: -rounded })
+    if (net > 0) creditors.push({ userId, amount: net })
+    else if (net < 0) debtors.push({ userId, amount: -net })
   }
 
   creditors.sort((a, b) => b.amount - a.amount)
@@ -21,18 +20,17 @@ function computeSettlements(balances) {
 
   while (ci < creditors.length && di < debtors.length) {
     const amount = Math.min(creditors[ci].amount, debtors[di].amount)
-    const rounded = Math.round(amount * 100) / 100
-    if (rounded > 0) {
+    if (amount > 0) {
       settlements.push({
         from: debtors[di].userId,
         to: creditors[ci].userId,
-        amount: rounded,
+        amount,
       })
     }
-    creditors[ci].amount = Math.round((creditors[ci].amount - amount) * 100) / 100
-    debtors[di].amount = Math.round((debtors[di].amount - amount) * 100) / 100
-    if (creditors[ci].amount < 0.01) ci++
-    if (debtors[di].amount < 0.01) di++
+    creditors[ci].amount -= amount
+    debtors[di].amount -= amount
+    if (creditors[ci].amount <= 0) ci++
+    if (debtors[di].amount <= 0) di++
   }
 
   return settlements

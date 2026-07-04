@@ -41,14 +41,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-      if ('serviceWorker' in navigator && !navigator.serviceWorker.controller) {
-        navigator.serviceWorker.addEventListener('controllerchange', function onControlled() {
-          navigator.serviceWorker.removeEventListener('controllerchange', onControlled)
-          navigateTo(window.location.hash)
-        })
-      } else {
-        navigateTo(window.location.hash)
-      }
+      navigateTo(window.location.hash)
     })
 
     window.addEventListener('hashchange', function () {

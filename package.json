@@ -4,8 +4,8 @@
   "description": "Mobile-first PWA for splitting expenses among groups",
   "private": true,
   "scripts": {
-    "test": "npx playwright test",
-    "test:ui": "npx playwright test --ui"
+    "test": "npx playwright test --config=tests/e2e/playwright.config.js",
+    "test:ui": "npx playwright test --config=tests/e2e/playwright.config.js --ui"
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",

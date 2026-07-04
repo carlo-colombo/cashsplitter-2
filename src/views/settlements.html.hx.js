@@ -2,7 +2,7 @@ export function renderBalances(balances, members) {
   let html = '<div class="balances-section">'
   html += '<h3>Balances</h3>'
 
-  const hasBalances = Object.values(balances).some((b) => Math.abs(b) > 0.01)
+  const hasBalances = Object.values(balances).some((b) => Math.abs(b) >= 1)
 
   if (!hasBalances) {
     html += '<p class="settled">All settled up!</p>'
@@ -13,7 +13,7 @@ export function renderBalances(balances, members) {
       const name = member ? member.name : userId
       const cls = net >= 0 ? 'positive' : 'negative'
       const label = net >= 0 ? 'is owed' : 'owes'
-      html += `<tr><td>${escapeHtml(name)}</td><td class="${cls}">${label} €${Math.abs(net).toFixed(2)}</td></tr>`
+      html += `<tr><td>${escapeHtml(name)}</td><td class="${cls}">${label} €${(Math.abs(net) / 100).toFixed(2)}</td></tr>`
     }
     html += '</tbody></table>'
   }
@@ -35,7 +35,7 @@ export function renderSettlements(settlements, members) {
     for (const s of settlements) {
       const fromName = members.find((m) => m.id === s.from)?.name || s.from
       const toName = members.find((m) => m.id === s.to)?.name || s.to
-      html += `<li>${escapeHtml(fromName)} pays ${escapeHtml(toName)} €${s.amount.toFixed(2)}</li>`
+      html += `<li>${escapeHtml(fromName)} pays ${escapeHtml(toName)} €${(s.amount / 100).toFixed(2)}</li>`
     }
     html += '</ol>'
   }

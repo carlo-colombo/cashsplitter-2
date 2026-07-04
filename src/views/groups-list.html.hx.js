@@ -20,7 +20,7 @@ export function renderGroupsList(groups) {
     for (const id of groupIds) {
       const g = groups[id]
       html += `<div class="group-card">`
-      html += `<h3><a href="#" hx-get="/api/groups/${escapeHtml(id)}" hx-target="#main-content" hx-push-url="true">${escapeHtml(g.name)}</a></h3>`
+      html += `<h3><a href="#/groups/${escapeHtml(id)}" hx-get="/api/groups/${escapeHtml(id)}" hx-target="#main-content" hx-push-url="/#/groups/${escapeHtml(id)}">${escapeHtml(g.name)}</a></h3>`
       html += '</div>'
     }
     html += '</div>'
