@@ -5,7 +5,7 @@ export function renderGroupsList(groups) {
 
   html += '<div class="create-group-form">'
   html += '<h2>Create Group</h2>'
-  html += '<form hx-post="/api/groups" hx-target="body" hx-swap="innerHTML">'
+  html += '<form hx-post="/api/groups" hx-target="#main-content" hx-swap="innerHTML">'
   html += '<input type="text" name="name" placeholder="Group name" required minlength="1">'
   html += '<button type="submit" class="btn btn-primary">Create</button>'
   html += '</form>'

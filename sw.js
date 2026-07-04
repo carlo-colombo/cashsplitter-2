@@ -37,14 +37,38 @@ self.addEventListener('activate', (event) => {
   )
 })
 
-async function serveOfflineFallback() {
+function isNavigationRequest(request) {
+  return request.mode === 'navigate'
+}
+
+function isAssetRequest(url) {
+  const ext = url.pathname.split('.').pop().toLowerCase()
+  return ['css', 'js', 'png', 'svg', 'ico', 'jpg', 'jpeg', 'gif', 'webp', 'woff', 'woff2', 'ttf'].includes(ext)
+}
+
+async function serveOfflineFallback(request) {
+  const url = new URL(request.url)
+  const isNav = isNavigationRequest(request)
+  const isAsset = isAssetRequest(url)
+
+  if (isNav) {
+    const cache = await caches.open(CACHE_NAME)
+    const cached = await cache.match('/index.html')
+    if (cached) return cached
+    return new Response(
+      '<html><body><h1>Offline</h1><p>CashSplitter is offline.</p></body></html>',
+      { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+    )
+  }
+
+  if (isAsset) {
+    return new Response('', { status: 503 })
+  }
+
   const cache = await caches.open(CACHE_NAME)
   const cached = await cache.match('/index.html')
   if (cached) return cached
-  return new Response(
-    '<html><body><h1>Offline</h1><p>CashSplitter is offline.</p></body></html>',
-    { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
-  )
+  return new Response('Offline', { status: 503 })
 }
 
 self.addEventListener('fetch', (event) => {
@@ -70,6 +94,21 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith(
     (async () => {
+      if (isNavigationRequest(request)) {
+        const cached = await caches.match('/index.html')
+        if (cached) return cached
+        try {
+          const response = await fetch(request)
+          if (response.ok) {
+            const cache = await caches.open(CACHE_NAME)
+            cache.put('/index.html', response.clone())
+          }
+          return response
+        } catch {
+          return serveOfflineFallback(request)
+        }
+      }
+
       const cached = await caches.match(request)
       if (cached) return cached
       try {
@@ -80,7 +119,7 @@ self.addEventListener('fetch', (event) => {
         }
         return response
       } catch {
-        return serveOfflineFallback()
+        return serveOfflineFallback(request)
       }
     })()
   )

@@ -15,11 +15,6 @@ async function setupPage(browser) {
     'serviceWorker' in navigator && navigator.serviceWorker.controller !== null,
     { timeout: 15000 }
   )
-  await page.reload()
-  await page.waitForFunction(() =>
-    'serviceWorker' in navigator && navigator.serviceWorker.controller !== null,
-    { timeout: 15000 }
-  )
   return { page, ctx }
 }
 
@@ -168,8 +163,8 @@ test.describe('CashSplitter', () => {
   test('9. Page shell loads with title and app header', async ({ browser }) => {
     const { page, ctx } = await setupPage(browser)
     await expect(page).toHaveTitle('CashSplitter')
-    await expect(page.locator('.app-header')).toBeVisible()
-    await expect(page.locator('.app-title')).toContainText('CashSplitter')
+    await expect(page.locator('.app-header').first()).toBeVisible()
+    await expect(page.locator('.app-title').first()).toContainText('CashSplitter')
     await ctx.close()
   })
 })

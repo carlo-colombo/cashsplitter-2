@@ -8,9 +8,16 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="CashSplitter">
   <link rel="manifest" href="/manifest.json">
-  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="/icon.svg">
   <link rel="stylesheet" href="/styles/app.css">
   <title>CashSplitter</title>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { type: 'module' }).catch((err) => {
+        console.error('SW registration failed:', err)
+      })
+    }
+  </script>
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 <body>
@@ -18,7 +25,7 @@
     <h1 class="app-title">CashSplitter</h1>
   </header>
 
-  <main id="main-content" hx-get="/api/groups" hx-trigger="load" hx-target="this">
+  <main id="main-content" hx-get="/api/groups" hx-trigger="load delay:200ms" hx-target="this">
     <div class="loading-indicator">Loading...</div>
   </main>
 
@@ -28,14 +35,5 @@
     </div>
   </noscript>
 
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js', { type: 'module' }).catch((err) => {
-          console.error('SW registration failed:', err)
-        })
-      })
-    }
-  </script>
 </body>
 </html>
