@@ -13,7 +13,7 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'npx serve . -p 3333 --single',
+    command: 'node server.js',
     port: 3333,
     reuseExistingServer: true,
     timeout: 10000,

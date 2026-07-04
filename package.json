@@ -8,7 +8,6 @@
     "test:ui": "npx playwright test --config=tests/e2e/playwright.config.js --ui"
   },
   "devDependencies": {
-    "@playwright/test": "^1.52.0",
-    "serve": "^14.2.6"
+    "@playwright/test": "^1.52.0"
   }
 }
