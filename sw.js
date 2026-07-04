@@ -26,8 +26,13 @@ const STATIC_ASSETS = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then((cache) =>
+      cache.addAll(STATIC_ASSETS).catch((err) => {
+        console.error('Cache install warning (non-fatal):', err)
+      })
+    )
   )
+  self.skipWaiting()
 })
 
 self.addEventListener('activate', (event) => {
