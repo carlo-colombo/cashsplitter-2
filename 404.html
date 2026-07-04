@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1a8c4e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CashSplitter">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon.svg">
+  <link rel="stylesheet" href="/styles/app.css">
+  <title>CashSplitter</title>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { type: 'module' }).catch((err) => {
+        console.error('SW registration failed:', err)
+      })
+    }
+  </script>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script>
+    function navigateTo(hash) {
+      const path = hash.replace(/^#/, '') || '/'
+      let url
+      if (path === '/' || path === '') {
+        url = '/api/groups'
+      } else {
+        const match = path.match(/^\/groups\/(.+)$/)
+        if (match) {
+          url = '/api/groups/' + encodeURIComponent(match[1])
+        } else {
+          url = '/api/groups'
+        }
+      }
+      if (typeof htmx !== 'undefined') {
+        htmx.ajax('GET', url, { target: '#main-content', swap: 'innerHTML' })
+      } else {
+        document.getElementById('main-content').innerHTML = '<div class="loading-indicator">Loading...</div>'
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      navigateTo(window.location.hash)
+    })
+
+    window.addEventListener('hashchange', function () {
+      navigateTo(window.location.hash)
+    })
+  </script>
+</head>
+<body>
+  <header class="app-header">
+    <h1 class="app-title">CashSplitter</h1>
+  </header>
+
+  <main id="main-content">
+    <div class="loading-indicator">Loading...</div>
+  </main>
+
+  <noscript>
+    <div class="noscript-warning">
+      CashSplitter requires JavaScript to function. Please enable JavaScript in your browser.
+    </div>
+  </noscript>
+
+</body>
+</html>
