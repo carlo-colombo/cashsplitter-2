@@ -41,3 +41,28 @@ jobs:
           path: .
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  smoke-test-deployed:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-v1-${{ hashFiles('package-lock.json') }}
+      - run: npx playwright install chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - name: Wait for GitHub Pages deploy to propagate
+        run: sleep 30
+      - name: Run e2e tests against deployed site
+        run: npx playwright test --config=tests/e2e/playwright.prod.config.js
+        env:
+          BASE_URL: https://carlo-colombo.github.io/cashsplitter-2

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const BASE = 'http://localhost:3333/cashsplitter-2'
+const BASE = process.env.BASE_URL || 'http://localhost:3333/cashsplitter-2'
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6)
