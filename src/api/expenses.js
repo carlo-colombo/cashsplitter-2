@@ -3,6 +3,7 @@ import { projectState, createEvent, EXPENSE_ADDED, LEDGER_ENTRY } from '../db/ev
 import { splitEqual, splitByShares, splitCustom, validateCustomTotal } from '../lib/split.js'
 import { render } from '../lib/template.js'
 import { BASE_PATH } from '../lib/config.js'
+import { getSettlementHistory } from './settlements.js'
 
 function lookupName(users, userId) {
   const u = users[userId]
@@ -205,13 +206,18 @@ export async function add(params, request) {
 
   const updatedEvents = await getAllEvents()
   const updatedState = projectState(updatedEvents)
-  const data = buildGroupDetailData(
-    updatedState.groups[groupId],
-    updatedState.members[groupId] || [],
-    updatedState.users,
-    updatedState.expenses[groupId] || [],
-    updatedState.balances[groupId] || {}
-  )
+  const settlementHistory = getSettlementHistory(updatedEvents, groupId, updatedState.users)
+  const data = {
+    ...buildGroupDetailData(
+      updatedState.groups[groupId],
+      updatedState.members[groupId] || [],
+      updatedState.users,
+      updatedState.expenses[groupId] || [],
+      updatedState.balances[groupId] || {}
+    ),
+    hasSettlementHistory: settlementHistory.length > 0,
+    settlementHistory,
+  }
   const html = render('group-detail', data)
   return new Response(html, {
     headers: { 'Content-Type': 'text/html; charset=utf-8' },

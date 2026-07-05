@@ -2,6 +2,7 @@ import { addEvent, getAllEvents } from '../db/store.js'
 import { projectState, createEvent, GROUP_CREATED } from '../db/events.js'
 import { render } from '../lib/template.js'
 import { BASE_PATH } from '../lib/config.js'
+import { getSettlementHistory } from './settlements.js'
 
 function lookupName(users, userId) {
   const u = users[userId]
@@ -69,7 +70,11 @@ export async function create(_params, request) {
   const allEvents = await getAllEvents()
   const state = projectState(allEvents)
   const group = state.groups[id]
-  const data = buildGroupDetailData(group, [], state.users, [], {})
+  const data = {
+    ...buildGroupDetailData(group, [], state.users, [], {}),
+    hasSettlementHistory: false,
+    settlementHistory: [],
+  }
   const html = render('group-detail', data)
   return new Response(html, {
     status: 200,
@@ -94,7 +99,12 @@ export async function detail(params, _request) {
   const memberIds = state.members[groupId] || []
   const expenses = state.expenses[groupId] || []
   const balances = state.balances[groupId] || {}
-  const data = buildGroupDetailData(group, memberIds, state.users, expenses, balances)
+  const settlementHistory = getSettlementHistory(events, groupId, state.users)
+  const data = {
+    ...buildGroupDetailData(group, memberIds, state.users, expenses, balances),
+    hasSettlementHistory: settlementHistory.length > 0,
+    settlementHistory,
+  }
   const html = render('group-detail', data)
   return new Response(html, {
     headers: { 'Content-Type': 'text/html; charset=utf-8' },

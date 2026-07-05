@@ -15,6 +15,7 @@ const STATIC_ASSETS = [
   p('/src/api/members.js'),
   p('/src/api/expenses.js'),
   p('/src/api/balances.js'),
+  p('/src/api/settlements.js'),
   p('/src/db/store.js'),
   p('/src/db/events.js'),
   p('/src/lib/config.js'),
@@ -25,10 +26,11 @@ const STATIC_ASSETS = [
   p('/src/views/expense-form.html.hx'),
   p('/src/views/member-form.html.hx'),
   p('/src/views/settlements.html.hx'),
+  p('/src/views/settlement-form.html.hx'),
   p('/icon.svg'),
 ]
 
-const TEMPLATE_NAMES = ['groups-list', 'group-detail', 'expense-form', 'member-form', 'settlements']
+const TEMPLATE_NAMES = ['groups-list', 'group-detail', 'expense-form', 'member-form', 'settlements', 'settlement-form']
 
 async function loadTemplates() {
   for (const name of TEMPLATE_NAMES) {

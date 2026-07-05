@@ -16,6 +16,7 @@
   <p class="settled">All settled up!</p>
   {{/if}}
   <button class="btn btn-secondary" hx-get="{{{basePath}}}/api/groups/{{groupId}}/settlements" hx-target="#balances-container" hx-swap="innerHTML">View Settlements</button>
+  <button class="btn btn-secondary" hx-get="{{{basePath}}}/api/groups/{{groupId}}/settlements/form" hx-target="#settlement-form-area" hx-swap="innerHTML">Record Settlement</button>
 </div>
 {{/if}}
 

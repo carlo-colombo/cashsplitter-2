@@ -3,6 +3,7 @@ import * as groups from './groups.js'
 import * as members from './members.js'
 import * as expenses from './expenses.js'
 import * as balances from './balances.js'
+import * as settlements from './settlements.js'
 
 const routes = [
   { method: 'GET', pattern: new URLPattern({ pathname: BASE_PATH + '/api/groups' }), handler: groups.list },
@@ -14,6 +15,8 @@ const routes = [
   { method: 'POST', pattern: new URLPattern({ pathname: BASE_PATH + '/api/groups/:id/expenses' }), handler: expenses.add },
   { method: 'GET', pattern: new URLPattern({ pathname: BASE_PATH + '/api/groups/:id/balances' }), handler: balances.get },
   { method: 'GET', pattern: new URLPattern({ pathname: BASE_PATH + '/api/groups/:id/settlements' }), handler: balances.settlements },
+  { method: 'GET', pattern: new URLPattern({ pathname: BASE_PATH + '/api/groups/:id/settlements/form' }), handler: settlements.form },
+  { method: 'POST', pattern: new URLPattern({ pathname: BASE_PATH + '/api/groups/:id/settlements' }), handler: settlements.create },
 ]
 
 export async function handleRequest(request) {

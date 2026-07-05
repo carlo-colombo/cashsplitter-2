@@ -2,6 +2,7 @@ import { addEvent, getAllEvents } from '../db/store.js'
 import { projectState, createEvent, USER_CREATED, MEMBER_ADDED } from '../db/events.js'
 import { render } from '../lib/template.js'
 import { BASE_PATH } from '../lib/config.js'
+import { getSettlementHistory } from './settlements.js'
 
 function lookupName(users, userId) {
   const u = users[userId]
@@ -75,13 +76,18 @@ export async function add(params, request) {
   await addEvent(createEvent(MEMBER_ADDED, { groupId, userId, addedAt: now }))
   const updatedEvents = await getAllEvents()
   const updatedState = projectState(updatedEvents)
-  const data = buildGroupDetailData(
-    updatedState.groups[groupId],
-    updatedState.members[groupId] || [],
-    updatedState.users,
-    updatedState.expenses[groupId] || [],
-    updatedState.balances[groupId] || {}
-  )
+  const settlementHistory = getSettlementHistory(updatedEvents, groupId, updatedState.users)
+  const data = {
+    ...buildGroupDetailData(
+      updatedState.groups[groupId],
+      updatedState.members[groupId] || [],
+      updatedState.users,
+      updatedState.expenses[groupId] || [],
+      updatedState.balances[groupId] || {}
+    ),
+    hasSettlementHistory: settlementHistory.length > 0,
+    settlementHistory,
+  }
   const html = render('group-detail', data)
   return new Response(html, {
     headers: { 'Content-Type': 'text/html; charset=utf-8' },
