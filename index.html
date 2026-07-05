@@ -13,10 +13,50 @@
   <link rel="stylesheet" href="/cashsplitter-2/styles/app.css">
   <title>CashSplitter</title>
   <script>
+    let swRegistration = null
+
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/cashsplitter-2/sw.js', { type: 'module' }).catch((err) => {
+      navigator.serviceWorker.register('/cashsplitter-2/sw.js', { type: 'module' }).then((reg) => {
+        swRegistration = reg
+
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('New SW available — click ↻ to update')
+              }
+            })
+          }
+        })
+      }).catch((err) => {
         console.error('SW registration failed:', err)
       })
+
+      let reloading = false
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (reloading) return
+        reloading = true
+        window.location.reload()
+      })
+    }
+
+    async function forceSWRefresh() {
+      const btn = document.getElementById('sw-refresh-btn')
+      btn.classList.add('spinning')
+      try {
+        if (swRegistration) {
+          await swRegistration.update()
+          if (swRegistration.waiting) {
+            swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' })
+            return
+          }
+        }
+        window.location.reload()
+      } catch (e) {
+        console.error('SW refresh failed:', e)
+        window.location.reload()
+      }
     }
   </script>
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
@@ -60,6 +100,7 @@
 <body>
   <header class="app-header">
     <h1 class="app-title">CashSplitter</h1>
+    <button id="sw-refresh-btn" class="sw-refresh-btn" title="Force refresh app" onclick="forceSWRefresh()">↻</button>
   </header>
 
   <main id="main-content">

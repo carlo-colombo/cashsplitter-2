@@ -32,12 +32,55 @@ img { max-width: 100%; height: auto; }
   top: 0;
   z-index: 100;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .app-title {
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+.sw-refresh-btn {
+  background: none;
+  border: 2px solid rgba(255,255,255,0.3);
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+
+.sw-refresh-btn:hover,
+.sw-refresh-btn:focus-visible {
+  border-color: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.1);
+  outline: none;
+}
+
+.sw-refresh-btn:active {
+  background: rgba(255,255,255,0.2);
+}
+
+.sw-refresh-btn.spinning {
+  animation: sw-spin 0.8s linear infinite;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+@keyframes sw-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 #main-content {
@@ -432,6 +475,7 @@ section h3 {
 @media (min-width: 768px) {
   .app-header { padding: 16px 24px; }
   .app-title { font-size: 1.35rem; }
+  .sw-refresh-btn { width: 44px; height: 44px; font-size: 1.4rem; }
   #main-content { padding: 24px; }
   .groups-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .group-actions { gap: 12px; }
