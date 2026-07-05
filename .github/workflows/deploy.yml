@@ -41,6 +41,10 @@ jobs:
           path: .
       - id: deployment
         uses: actions/deploy-pages@v4
+        continue-on-error: true
+      - name: Retry deploy on failure
+        if: steps.deployment.outcome != 'success'
+        uses: actions/deploy-pages@v4
 
   smoke-test-deployed:
     needs: deploy
