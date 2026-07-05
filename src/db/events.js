@@ -1,3 +1,4 @@
+export const USER_CREATED = 'USER_CREATED'
 export const GROUP_CREATED = 'GROUP_CREATED'
 export const MEMBER_ADDED = 'MEMBER_ADDED'
 export const EXPENSE_ADDED = 'EXPENSE_ADDED'
@@ -14,8 +15,10 @@ function deepClone(obj) {
 
 export function projectState(events) {
   const state = {
+    users: {},
     groups: {},
     members: {},
+    groupMembers: {},
     expenses: {},
     payments: {},
     balances: {},
@@ -23,22 +26,32 @@ export function projectState(events) {
 
   for (const event of events) {
     switch (event.type) {
+      case USER_CREATED: {
+        const { id, name, createdAt } = event.data
+        state.users[id] = { id, name, createdAt }
+        break
+      }
       case GROUP_CREATED: {
         const { id, name } = event.data
         state.groups[id] = { id, name, created: event.timestamp }
         state.members[id] = []
+        state.groupMembers[id] = []
         state.expenses[id] = []
         state.payments[id] = []
         state.balances[id] = {}
         break
       }
       case MEMBER_ADDED: {
-        const { groupId, id, name } = event.data
+        const { groupId, userId, addedAt } = event.data
         if (state.members[groupId]) {
-          state.members[groupId].push({ id, name })
+          state.members[groupId].push(userId)
         }
-        if (state.balances[groupId] && !(id in state.balances[groupId])) {
-          state.balances[groupId][id] = 0
+        if (state.groupMembers[groupId]) {
+          const user = state.users[userId] || { name: userId }
+          state.groupMembers[groupId].push({ userId, userName: user.name, addedAt })
+        }
+        if (state.balances[groupId] && !(userId in state.balances[groupId])) {
+          state.balances[groupId][userId] = 0
         }
         break
       }

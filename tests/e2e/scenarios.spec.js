@@ -341,3 +341,65 @@ test.describe('CashSplitter', () => {
     await ctx.close()
   })
 })
+
+test.describe('Global Users', () => {
+  test('18. Create member creates global user', async ({ browser }) => {
+    const { page, ctx } = await setupPage(browser)
+    const name = `Group ${uid()}`
+    await createGroup(page, name)
+    await addMember(page, 'Alice')
+    await expect(page.locator('.member-list')).toContainText('Alice')
+    await ctx.close()
+  })
+
+  test('19. Same name in two groups creates separate users', async ({ browser }) => {
+    const { page, ctx } = await setupPage(browser)
+    const groupA = `A ${uid()}`
+    await createGroup(page, groupA)
+    await addMember(page, 'Alice')
+    await page.click('a.back-link')
+    await page.waitForSelector('input[name="name"]', { timeout: 10000 })
+    const groupB = `B ${uid()}`
+    await createGroup(page, groupB)
+    await addMember(page, 'Alice')
+    await expect(page.locator('.member-list')).toContainText('Alice')
+    await ctx.close()
+  })
+
+  test('20. Member displayed with global user name in expenses', async ({ browser }) => {
+    const { page, ctx } = await setupPage(browser)
+    const name = `Group ${uid()}`
+    await createGroup(page, name)
+    await addMember(page, 'Alice')
+    await addMember(page, 'Bob')
+    await addExpense(page, 'Dinner', '20', 0)
+    await page.click('form button:has-text("Add Expense")')
+    await expect(page.locator('.expense-list')).toContainText('Alice')
+    await ctx.close()
+  })
+
+  test('21. Member name appears in balances', async ({ browser }) => {
+    const { page, ctx } = await setupPage(browser)
+    const name = `Group ${uid()}`
+    await createGroup(page, name)
+    await addMember(page, 'Alice')
+    await addMember(page, 'Bob')
+    await addExpense(page, 'Lunch', '20', 0)
+    await page.click('form button:has-text("Add Expense")')
+    await expect(page.locator('.balance-list')).toContainText('Alice is owed')
+    await expect(page.locator('.balance-list')).toContainText('Bob owes')
+    await ctx.close()
+  })
+
+  test('22. Member form still works (regression)', async ({ browser }) => {
+    const { page, ctx } = await setupPage(browser)
+    const name = `Group ${uid()}`
+    await createGroup(page, name)
+    await page.click('button:has-text("Add Member")')
+    await page.waitForSelector('#member-name', { timeout: 10000 })
+    await page.fill('#member-name', 'Charlie')
+    await page.click('form button:has-text("Add")')
+    await expect(page.locator('.member-list')).toContainText('Charlie', { timeout: 10000 })
+    await ctx.close()
+  })
+})

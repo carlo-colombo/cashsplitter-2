@@ -3,9 +3,9 @@ import { projectState } from '../db/events.js'
 import { render } from '../lib/template.js'
 import { BASE_PATH } from '../lib/config.js'
 
-function lookupName(members, userId) {
-  const m = members.find(m => m.id === userId)
-  return m ? m.name : userId
+function lookupName(users, userId) {
+  const u = users[userId]
+  return u ? u.name : userId
 }
 
 function computeSettlements(balances) {
@@ -40,14 +40,13 @@ export async function get(params, _request) {
     return new Response('<div class="error">Group not found</div>', { status: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' } })
   }
   const balances = state.balances[groupId] || {}
-  const members = state.members[groupId] || []
   const hasBalances = Object.values(balances).some(b => Math.abs(b) >= 1)
   const data = {
     isBalances: true,
     isSettlements: false,
     hasBalances,
     balanceItems: Object.entries(balances).map(([userId, net]) => ({
-      name: lookupName(members, userId),
+      name: lookupName(state.users, userId),
       amount: (Math.abs(net) / 100).toFixed(2),
       cls: net >= 0 ? 'positive' : 'negative',
       label: net >= 0 ? 'is owed' : 'owes'
@@ -69,7 +68,6 @@ export async function settlements(params, _request) {
     return new Response('<div class="error">Group not found</div>', { status: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' } })
   }
   const balances = state.balances[groupId] || {}
-  const members = state.members[groupId] || []
   const settlementsList = computeSettlements(balances)
   const data = {
     isBalances: false,
@@ -78,8 +76,8 @@ export async function settlements(params, _request) {
     balanceItems: [],
     hasSettlements: settlementsList.length > 0,
     settlementItems: settlementsList.map(s => ({
-      fromName: lookupName(members, s.from),
-      toName: lookupName(members, s.to),
+      fromName: lookupName(state.users, s.from),
+      toName: lookupName(state.users, s.to),
       amount: (s.amount / 100).toFixed(2)
     })),
     groupId,

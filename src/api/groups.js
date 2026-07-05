@@ -3,35 +3,35 @@ import { projectState, createEvent, GROUP_CREATED } from '../db/events.js'
 import { render } from '../lib/template.js'
 import { BASE_PATH } from '../lib/config.js'
 
-function lookupName(members, userId) {
-  const m = members.find(m => m.id === userId)
-  return m ? m.name : userId
+function lookupName(users, userId) {
+  const u = users[userId]
+  return u ? u.name : userId
 }
 
-function formatPayerNames(paidBy, members) {
+function formatPayerNames(paidBy, users) {
   return Object.entries(paidBy)
-    .map(([id, amt]) => `${lookupName(members, id)} (\u20AC${(amt / 100).toFixed(2)})`)
+    .map(([id, amt]) => `${lookupName(users, id)} (\u20AC${(amt / 100).toFixed(2)})`)
     .join(', ')
 }
 
-function buildGroupDetailData(group, members, expenses, balances) {
+function buildGroupDetailData(group, memberIds, users, expenses, balances) {
   const balanceItems = Object.entries(balances).map(([userId, net]) => ({
-    name: lookupName(members, userId),
+    name: lookupName(users, userId),
     amount: (Math.abs(net) / 100).toFixed(2),
     cls: net >= 0 ? 'positive' : 'negative',
     label: net >= 0 ? 'is owed' : 'owes'
   }))
   return {
     group: { id: group.id, name: group.name },
-    memberCount: members.length,
-    memberLabel: members.length === 1 ? 'member' : 'members',
-    hasMembers: members.length > 0,
-    members: members.map(m => ({ id: m.id, name: m.name })),
+    memberCount: memberIds.length,
+    memberLabel: memberIds.length === 1 ? 'member' : 'members',
+    hasMembers: memberIds.length > 0,
+    members: memberIds.map(id => ({ id, name: lookupName(users, id) })),
     hasExpenses: expenses.length > 0,
     expenses: expenses.map(e => ({
       description: e.description,
       totalFormatted: (e.total / 100).toFixed(2),
-      payerNames: formatPayerNames(e.paidBy, members)
+      payerNames: formatPayerNames(e.paidBy, users)
     })),
     hasBalances: Object.values(balances).some(b => Math.abs(b) >= 1),
     balanceItems,
@@ -69,7 +69,7 @@ export async function create(_params, request) {
   const allEvents = await getAllEvents()
   const state = projectState(allEvents)
   const group = state.groups[id]
-  const data = buildGroupDetailData(group, [], [], {})
+  const data = buildGroupDetailData(group, [], state.users, [], {})
   const html = render('group-detail', data)
   return new Response(html, {
     status: 200,
@@ -91,10 +91,10 @@ export async function detail(params, _request) {
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
     })
   }
-  const members = state.members[groupId] || []
+  const memberIds = state.members[groupId] || []
   const expenses = state.expenses[groupId] || []
   const balances = state.balances[groupId] || {}
-  const data = buildGroupDetailData(group, members, expenses, balances)
+  const data = buildGroupDetailData(group, memberIds, state.users, expenses, balances)
   const html = render('group-detail', data)
   return new Response(html, {
     headers: { 'Content-Type': 'text/html; charset=utf-8' },

@@ -4,35 +4,35 @@ import { splitEqual, splitByShares, splitCustom, validateCustomTotal } from '../
 import { render } from '../lib/template.js'
 import { BASE_PATH } from '../lib/config.js'
 
-function lookupName(members, userId) {
-  const m = members.find(m => m.id === userId)
-  return m ? m.name : userId
+function lookupName(users, userId) {
+  const u = users[userId]
+  return u ? u.name : userId
 }
 
-function formatPayerNames(paidBy, members) {
+function formatPayerNames(paidBy, users) {
   return Object.entries(paidBy)
-    .map(([id, amt]) => `${lookupName(members, id)} (\u20AC${(amt / 100).toFixed(2)})`)
+    .map(([id, amt]) => `${lookupName(users, id)} (\u20AC${(amt / 100).toFixed(2)})`)
     .join(', ')
 }
 
-function buildGroupDetailData(group, members, expenses, balances) {
+function buildGroupDetailData(group, memberIds, users, expenses, balances) {
   const balanceItems = Object.entries(balances).map(([userId, net]) => ({
-    name: lookupName(members, userId),
+    name: lookupName(users, userId),
     amount: (Math.abs(net) / 100).toFixed(2),
     cls: net >= 0 ? 'positive' : 'negative',
     label: net >= 0 ? 'is owed' : 'owes'
   }))
   return {
     group: { id: group.id, name: group.name },
-    memberCount: members.length,
-    memberLabel: members.length === 1 ? 'member' : 'members',
-    hasMembers: members.length > 0,
-    members: members.map(m => ({ id: m.id, name: m.name })),
+    memberCount: memberIds.length,
+    memberLabel: memberIds.length === 1 ? 'member' : 'members',
+    hasMembers: memberIds.length > 0,
+    members: memberIds.map(id => ({ id, name: lookupName(users, id) })),
     hasExpenses: expenses.length > 0,
     expenses: expenses.map(e => ({
       description: e.description,
       totalFormatted: (e.total / 100).toFixed(2),
-      payerNames: formatPayerNames(e.paidBy, members)
+      payerNames: formatPayerNames(e.paidBy, users)
     })),
     hasBalances: Object.values(balances).some(b => Math.abs(b) >= 1),
     balanceItems,
@@ -87,8 +87,8 @@ export async function form(params, _request) {
   const groupId = params.id
   const events = await getAllEvents()
   const state = projectState(events)
-  const members = state.members[groupId] || []
-  const memberData = members.map(m => ({ id: m.id, name: m.name }))
+  const memberIds = state.members[groupId] || []
+  const memberData = memberIds.map(id => ({ id, name: lookupName(state.users, id) }))
   const data = {
     groupId,
     members: memberData,
@@ -127,8 +127,8 @@ export async function add(params, request) {
     )
   }
 
-  const members = state.members[groupId] || []
-  if (members.length === 0) {
+  const memberIds = state.members[groupId] || []
+  if (memberIds.length === 0) {
     return new Response(
       '<div class="error">Group has no members</div>',
       { status: 400, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
@@ -140,10 +140,10 @@ export async function add(params, request) {
   if (singlePayer) {
     paidBy[singlePayer] = totalCents
   } else {
-    for (const member of members) {
-      const val = parseFloat(form.get(`paid_${member.id}`))
+    for (const memberId of memberIds) {
+      const val = parseFloat(form.get(`paid_${memberId}`))
       if (!isNaN(val) && val > 0) {
-        paidBy[member.id] = Math.round(val * 100)
+        paidBy[memberId] = Math.round(val * 100)
       }
     }
   }
@@ -164,19 +164,19 @@ export async function add(params, request) {
   const strategy = form.get('splitStrategy')
   let split
   if (strategy === 'equal') {
-    split = splitEqual(totalCents, members.map((m) => m.id))
+    split = splitEqual(totalCents, memberIds)
   } else if (strategy === 'shares') {
     const shares = {}
-    for (const member of members) {
-      const val = parseFloat(form.get(`shares_${member.id}`))
-      shares[member.id] = val > 0 ? val : 1
+    for (const memberId of memberIds) {
+      const val = parseFloat(form.get(`shares_${memberId}`))
+      shares[memberId] = val > 0 ? val : 1
     }
     split = splitByShares(totalCents, shares)
   } else if (strategy === 'custom') {
     const amounts = {}
-    for (const member of members) {
-      const val = parseFloat(form.get(`amount_${member.id}`))
-      amounts[member.id] = isNaN(val) ? 0 : Math.round(val * 100)
+    for (const memberId of memberIds) {
+      const val = parseFloat(form.get(`amount_${memberId}`))
+      amounts[memberId] = isNaN(val) ? 0 : Math.round(val * 100)
     }
     if (!validateCustomTotal(amounts, totalCents)) {
       return new Response(
@@ -208,6 +208,7 @@ export async function add(params, request) {
   const data = buildGroupDetailData(
     updatedState.groups[groupId],
     updatedState.members[groupId] || [],
+    updatedState.users,
     updatedState.expenses[groupId] || [],
     updatedState.balances[groupId] || {}
   )
