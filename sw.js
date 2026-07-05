@@ -1,5 +1,6 @@
 import { BASE_PATH, p } from './src/lib/config.js'
 import { handleRequest } from './src/api/router.js'
+import { setTemplate } from './src/lib/template.js'
 
 const CACHE_NAME = 'cashsplitter-static-v1'
 const STATIC_ASSETS = [
@@ -18,13 +19,33 @@ const STATIC_ASSETS = [
   p('/src/db/events.js'),
   p('/src/lib/config.js'),
   p('/src/lib/split.js'),
-  p('/src/views/groups-list.html.hx.js'),
-  p('/src/views/group-detail.html.hx.js'),
-  p('/src/views/expense-form.html.hx.js'),
-  p('/src/views/member-form.html.hx.js'),
-  p('/src/views/settlements.html.hx.js'),
+  p('/src/lib/template.js'),
+  p('/src/views/groups-list.html.hx'),
+  p('/src/views/group-detail.html.hx'),
+  p('/src/views/expense-form.html.hx'),
+  p('/src/views/member-form.html.hx'),
+  p('/src/views/settlements.html.hx'),
   p('/icon.svg'),
 ]
+
+const TEMPLATE_NAMES = ['groups-list', 'group-detail', 'expense-form', 'member-form', 'settlements']
+
+async function loadTemplates() {
+  for (const name of TEMPLATE_NAMES) {
+    try {
+      const cache = await caches.open(CACHE_NAME)
+      let res = await cache.match(p(`/src/views/${name}.html.hx`))
+      if (!res) {
+        res = await fetch(p(`/src/views/${name}.html.hx`))
+      }
+      if (res && res.ok) {
+        setTemplate(name, await res.text())
+      }
+    } catch (err) {
+      console.error('Failed to load template ' + name + ': ' + err.message)
+    }
+  }
+}
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -32,7 +53,7 @@ self.addEventListener('install', (event) => {
       cache.addAll(STATIC_ASSETS).catch((err) => {
         console.error('Cache install warning (non-fatal):', err)
       })
-    )
+    ).then(() => loadTemplates())
   )
   self.skipWaiting()
 })
@@ -58,7 +79,6 @@ async function serveOfflineFallback(request) {
   const url = new URL(request.url)
   const isNav = isNavigationRequest(request)
   const isAsset = isAssetRequest(url)
-
   if (isNav) {
     const cache = await caches.open(CACHE_NAME)
     const cached = await cache.match(p('/index.html'))
@@ -68,11 +88,9 @@ async function serveOfflineFallback(request) {
       { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
     )
   }
-
   if (isAsset) {
     return new Response('', { status: 503 })
   }
-
   const cache = await caches.open(CACHE_NAME)
   const cached = await cache.match(p('/index.html'))
   if (cached) return cached
@@ -82,7 +100,6 @@ async function serveOfflineFallback(request) {
 self.addEventListener('fetch', (event) => {
   const request = event.request
   const url = new URL(request.url)
-
   if (url.pathname.startsWith(BASE_PATH + '/api/')) {
     event.respondWith(
       (async () => {
@@ -90,7 +107,7 @@ self.addEventListener('fetch', (event) => {
           return await handleRequest(request)
         } catch (err) {
           console.error('Router error:', err)
-          return new Response(`<div class="error">Router error: ${err.message}</div>`, {
+          return new Response('<div class="error">Router error: ' + err.message + '</div>', {
             status: 500,
             headers: { 'Content-Type': 'text/html; charset=utf-8' },
           })
@@ -99,7 +116,6 @@ self.addEventListener('fetch', (event) => {
     )
     return
   }
-
   event.respondWith(
     (async () => {
       if (isNavigationRequest(request)) {
@@ -116,7 +132,6 @@ self.addEventListener('fetch', (event) => {
           return serveOfflineFallback(request)
         }
       }
-
       const cached = await caches.match(request)
       if (cached) return cached
       try {

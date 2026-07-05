@@ -13,6 +13,7 @@ const MIME = {
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
   '.ico': 'image/x-icon',
+  '.hx': 'text/html; charset=utf-8',
 }
 
 http.createServer((req, res) => {

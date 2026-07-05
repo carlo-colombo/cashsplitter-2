@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "test": "npx playwright test --config=tests/e2e/playwright.config.js --reporter=list",
-    "test:ui": "npx playwright test --config=tests/e2e/playwright.config.js --ui"
+    "test:ui": "npx playwright test --config=tests/e2e/playwright.config.js --ui",
+    "test:unit": "node --test tests/unit/*.test.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0"
