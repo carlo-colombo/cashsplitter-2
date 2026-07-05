@@ -2,6 +2,7 @@ export const GROUP_CREATED = 'GROUP_CREATED'
 export const MEMBER_ADDED = 'MEMBER_ADDED'
 export const EXPENSE_ADDED = 'EXPENSE_ADDED'
 export const PAYMENT_MADE = 'PAYMENT_MADE'
+export const LEDGER_ENTRY = 'LEDGER_ENTRY'
 
 export function createEvent(type, data) {
   return { type, data }
@@ -52,17 +53,6 @@ export function projectState(events) {
             split,
           })
         }
-        if (state.balances[groupId]) {
-          const bal = state.balances[groupId]
-          if (bal[paidBy] !== undefined) {
-            bal[paidBy] += total
-          }
-          for (const [userId, amount] of Object.entries(split)) {
-            if (bal[userId] !== undefined) {
-              bal[userId] -= amount
-            }
-          }
-        }
         break
       }
       case PAYMENT_MADE: {
@@ -70,9 +60,13 @@ export function projectState(events) {
         if (state.payments[groupId]) {
           state.payments[groupId].push({ id, from, to, amount })
         }
+        break
+      }
+      case LEDGER_ENTRY: {
+        const { groupId, from, to, amount } = event.data
         if (state.balances[groupId]) {
-          state.balances[groupId][from] += amount
-          state.balances[groupId][to] -= amount
+          state.balances[groupId][from] = (state.balances[groupId][from] || 0) - amount
+          state.balances[groupId][to] = (state.balances[groupId][to] || 0) + amount
         }
         break
       }

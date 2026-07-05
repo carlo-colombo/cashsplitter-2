@@ -17,6 +17,36 @@ All data is stored as **immutable events** (event sourcing). Current state is de
 
 ---
 
+## CI Pipeline
+
+This project uses GitHub Actions (`.github/workflows/deploy.yml`) with 3 sequential jobs:
+
+| Job | Description |
+|-----|-------------|
+| `test` | Runs `npm test` (Playwright E2E + unit tests) |
+| `deploy` | Deploys to GitHub Pages (only if test passes) |
+| `smoke-test-deployed` | Runs E2E against the live deployed site |
+
+### Checking pipeline status
+
+Use `gh` to check the latest run status:
+
+```bash
+# List recent runs
+gh run list --repo carlo-colombo/cashsplitter-2 --limit 5
+
+# Watch a specific run in real-time
+gh run watch <run-id> --repo carlo-colombo/cashsplitter-2
+
+# View job details for a run
+gh run view <run-id> --repo carlo-colombo/cashsplitter-2 --json jobs
+
+# View logs for a failed job
+gh run view <run-id> --repo carlo-colombo/cashsplitter-2 --log-failed
+```
+
+---
+
 ## Task Management
 
 Tasks live in the `tasks/` directory:

@@ -29,7 +29,7 @@
       {{#if hasExpenses}}
       <ul class="expense-list">
         {{#each expenses}}
-        <li><strong>{{this.description}}</strong> &mdash; &euro;{{this.totalFormatted}} paid by {{this.payerName}}</li>
+        <li><strong>{{this.description}}</strong> &mdash; &euro;{{this.totalFormatted}} paid by {{this.payerNames}}</li>
         {{/each}}
       </ul>
       {{else}}

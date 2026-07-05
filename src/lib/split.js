@@ -42,6 +42,6 @@ export function splitCustom(amounts) {
 }
 
 export function validateCustomTotal(amounts, expectedTotalCents) {
-  const sum = Object.values(amounts).reduce((s, v) => s + Number(v), 0)
+  const sum = Object.values(amounts).reduce((s, v) => s + Math.round(Number(v)), 0)
   return sum === expectedTotalCents
 }

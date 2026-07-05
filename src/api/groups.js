@@ -8,6 +8,12 @@ function lookupName(members, userId) {
   return m ? m.name : userId
 }
 
+function formatPayerNames(paidBy, members) {
+  return Object.entries(paidBy)
+    .map(([id, amt]) => `${lookupName(members, id)} (\u20AC${(amt / 100).toFixed(2)})`)
+    .join(', ')
+}
+
 function buildGroupDetailData(group, members, expenses, balances) {
   const balanceItems = Object.entries(balances).map(([userId, net]) => ({
     name: lookupName(members, userId),
@@ -25,7 +31,7 @@ function buildGroupDetailData(group, members, expenses, balances) {
     expenses: expenses.map(e => ({
       description: e.description,
       totalFormatted: (e.total / 100).toFixed(2),
-      payerName: lookupName(members, e.paidBy)
+      payerNames: formatPayerNames(e.paidBy, members)
     })),
     hasBalances: Object.values(balances).some(b => Math.abs(b) >= 1),
     balanceItems,

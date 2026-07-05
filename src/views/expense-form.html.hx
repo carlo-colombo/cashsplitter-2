@@ -9,15 +9,15 @@
       <label for="total">Total (&euro;)</label>
       <input type="number" id="total" name="total" step="0.01" min="0.01" required>
     </div>
-    <div class="form-field">
-      <label for="paidBy">Paid by</label>
-      <select id="paidBy" name="paidBy" required>
-        <option value="">Select payer</option>
+    <fieldset class="form-field">
+      <legend>Paid by</legend>
+      <div id="paid-details">
         {{#each members}}
-        <option value="{{this.id}}">{{this.name}}</option>
+        <label>{{this.name}} &euro;<input type="number" name="paid_{{this.id}}" step="0.01" min="0" class="paid-input" data-member-idx="{{this@index}}"></label>
         {{/each}}
-      </select>
-    </div>
+      </div>
+      <p id="paid-validation" class="validation-message" style="display:none"></p>
+    </fieldset>
     <fieldset class="form-field">
       <legend>Split strategy</legend>
       <label><input type="radio" name="splitStrategy" value="equal" checked onchange="toggleSplitStrategy(this.value)"> Equal</label>
@@ -34,6 +34,50 @@
   </form>
   <script>
 var members = {{{membersJson}}};
+var paidValidation = document.getElementById('paid-validation');
+
+function updatePaidValidation() {
+  var total = parseFloat(document.getElementById('total').value) || 0;
+  var inputs = document.querySelectorAll('.paid-input');
+  var sum = 0;
+  for (var i = 0; i < inputs.length; i++) {
+    sum += parseFloat(inputs[i].value) || 0;
+  }
+  if (Math.abs(sum - total) > 0.005) {
+    paidValidation.style.display = 'block';
+    paidValidation.textContent = 'Sum of paid amounts (\u20AC' + sum.toFixed(2) + ') must equal total (\u20AC' + total.toFixed(2) + ')';
+    paidValidation.className = 'validation-message error';
+  } else {
+    paidValidation.style.display = 'none';
+  }
+}
+
+document.getElementById('total').addEventListener('input', function() {
+  var inputs = document.querySelectorAll('.paid-input');
+  if (inputs.length > 0) {
+    inputs[0].value = this.value;
+  }
+  updatePaidValidation();
+});
+
+var paidInputs = document.querySelectorAll('.paid-input');
+for (var i = 0; i < paidInputs.length; i++) {
+  paidInputs[i].addEventListener('input', updatePaidValidation);
+}
+
+document.querySelector('.expense-form form').addEventListener('submit', function(e) {
+  var total = parseFloat(document.getElementById('total').value) || 0;
+  var inputs = document.querySelectorAll('.paid-input');
+  var sum = 0;
+  for (var i = 0; i < inputs.length; i++) {
+    sum += parseFloat(inputs[i].value) || 0;
+  }
+  if (Math.abs(sum - total) > 0.005) {
+    e.preventDefault();
+    alert('Sum of paid amounts (\u20AC' + sum.toFixed(2) + ') must equal total (\u20AC' + total.toFixed(2) + ')');
+  }
+});
+
 function toggleSplitStrategy(value) {
   var container = document.getElementById('split-details');
   var html = '';
