@@ -403,3 +403,181 @@ test.describe('Global Users', () => {
     await ctx.close()
   })
 })
+
+test.describe('Homepage Group Summary', () => {
+  test('23. New group shows "No members" and "No expenses" on homepage', async ({ browser }) => {
+    const { page, ctx } = await setupPage(browser)
+    const name = `Group ${uid()}`
+    await createGroup(page, name)
+    // Navigate back to homepage
+    await page.click('a.back-link')
+    await page.waitForSelector('input[name="name"]', { timeout: 10000 })
+    // Verify empty states on the group card
+    await expect(page.locator('.group-card .group-members')).toHaveText('No members')
+    await expect(page.locator('.group-card .group-expenses')).toHaveText('No expenses')
+    await ctx.close()
+  })
+
+  test('24. Group card shows member names after adding members', async ({ browser }) => {
+    const { page, ctx } = await setupPage(browser)
+    const name = `Group ${uid()}`
+    await createGroup(page, name)
+    await addMember(page, 'Alice')
+    await addMember(page, 'Bob')
+    // Navigate back to homepage
+    await page.click('a.back-link')
+    await page.waitForSelector('input[name="name"]', { timeout: 10000 })
+    // Verify members shown and expenses still empty
+    const card = page.locator('.group-card')
+    await expect(card.locator('.group-members')).toContainText('Alice')
+    await expect(card.locator('.group-members')).toContainText('Bob')
+    await expect(card.locator('.group-expenses')).toHaveText('No expenses')
+    await ctx.close()
+  })
+
+  test('25. Group card shows expense count and total after adding expense', async ({ browser }) => {
+    const { page, ctx } = await setupPage(browser)
+    const name = `Group ${uid()}`
+    await createGroup(page, name)
+    await addMember(page, 'Alice')
+    await addMember(page, 'Bob')
+    await addExpense(page, 'Dinner', '30', 0)
+    await page.click('form button:has-text("Add Expense")')
+    // Navigate back to homepage
+    await page.click('a.back-link')
+    await page.waitForSelector('input[name="name"]', { timeout: 10000 })
+    // Verify expense count and total
+    const card = page.locator('.group-card')
+    await expect(card.locator('.group-expenses')).toContainText('1')
+    await expect(card.locator('.group-expenses')).toContainText('\u20AC30.00')
+    await ctx.close()
+  })
+
+  test('26. Group card updates with multiple expenses', async ({ browser }) => {
+    const { page, ctx } = await setupPage(browser)
+    const name = `Group ${uid()}`
+    await createGroup(page, name)
+    await addMember(page, 'Alice')
+    await addMember(page, 'Bob')
+    // First expense: €30
+    await addExpense(page, 'Dinner', '30', 0)
+    await page.click('form button:has-text("Add Expense")')
+    // Second expense: €20
+    await page.click('button:has-text("Add Expense")')
+    await page.waitForSelector('#description', { timeout: 10000 })
+    await page.fill('#description', 'Lunch')
+    await page.fill('#total', '20')
+    await page.click('form button:has-text("Add Expense")')
+    // Navigate back to homepage
+    await page.click('a.back-link')
+    await page.waitForSelector('input[name="name"]', { timeout: 10000 })
+    // Verify updated expense summary (2 expenses, €50 total)
+    const card = page.locator('.group-card')
+    await expect(card.locator('.group-expenses')).toContainText('2')
+    await expect(card.locator('.group-expenses')).toContainText('\\u20AC50.00')
+    await ctx.close()
+  })
+})
+
+test.describe('Hash Routing — reload non-regression', () => {
+  async function waitForSW(page) {
+    await page.waitForFunction(() =>
+      'serviceWorker' in navigator && navigator.serviceWorker.controller !== null,
+      { timeout: 15000 }
+    )
+  }
+
+  test('27. Reload after creating group preserves URL and group detail', async ({ browser }) => {
+    const { page, ctx } = await setupPage(browser)
+    const name = `Group ${uid()}`
+    await createGroup(page, name)
+
+    // Verify the URL contains the correct hash with group ID (under subpath)
+    await expect(page).toHaveURL(/\/cashsplitter-2\/#\/groups\//)
+
+    // Reload the page — this simulates what happens on GitHub Pages when navigating back
+    await page.reload()
+    await waitForSW(page)
+
+    // Verify the group detail is still shown after reload
+    await expect(page.locator(`h2:has-text("${name}")`)).toBeVisible({ timeout: 10000 })
+    await ctx.close()
+  })
+
+  test('28. Reload after adding members and expenses preserves full state', async ({ browser }) => {
+    const { page, ctx } = await setupPage(browser)
+    const name = `Group ${uid()}`
+    await createGroup(page, name)
+    await addMember(page, 'Alice')
+    await addMember(page, 'Bob')
+    await addExpense(page, 'Dinner', '30', 0)
+    await page.click('form button:has-text("Add Expense")')
+
+    // Verify content is loaded
+    await expect(page.locator('.expense-list')).toContainText('Dinner')
+    await expect(page.locator('.balance-list')).toContainText('Alice is owed')
+
+    // Reload the page
+    await page.reload()
+    await waitForSW(page)
+
+    // Verify full state survives reload
+    await expect(page.locator(`h2:has-text("${name}")`)).toBeVisible({ timeout: 10000 })
+    await expect(page.locator('.expense-list')).toContainText('Dinner')
+    await expect(page.locator('.balance-list')).toContainText('Alice is owed')
+
+    await ctx.close()
+  })
+
+  test('29. Reload on groups list preserves the list view', async ({ browser }) => {
+    const { page, ctx } = await setupPage(browser)
+    const name = `Group ${uid()}`
+    await createGroup(page, name)
+    await addMember(page, 'Alice')
+
+    // Navigate back to groups list via the back link (tests hx-push-url in back link)
+    await page.click('a.back-link')
+    await page.waitForSelector('input[name="name"]', { timeout: 10000 })
+
+    // Verify the URL has the correct hash for the home view
+    await expect(page).toHaveURL(/\/cashsplitter-2\/#\/?$/)
+
+    // Reload the page
+    await page.reload()
+    await waitForSW(page)
+
+    // Verify groups list is shown with the group
+    await expect(page.locator('.group-card')).toContainText(name)
+    await ctx.close()
+  })
+
+  test('30. Reload after clicking group card preserves group detail', async ({ browser }) => {
+    const { page, ctx } = await setupPage(browser)
+    const name = `Group ${uid()}`
+    await createGroup(page, name)
+    await addMember(page, 'Alice')
+    await addMember(page, 'Bob')
+
+    // Navigate back to list
+    await page.click('a.back-link')
+    await page.waitForSelector('input[name="name"]', { timeout: 10000 })
+
+    // Click the group card link (tests hx-push-url in groups list)
+    await page.click(`.group-card a[href*="groups/"]`)
+    await expect(page.locator(`h2:has-text("${name}")`)).toBeVisible({ timeout: 10000 })
+
+    // Verify URL
+    await expect(page).toHaveURL(/\/cashsplitter-2\/#\/groups\//)
+
+    // Reload
+    await page.reload()
+    await waitForSW(page)
+
+    // Verify group detail survives reload
+    await expect(page.locator(`h2:has-text("${name}")`)).toBeVisible({ timeout: 10000 })
+    await expect(page.locator('.member-list')).toContainText('Alice')
+    await expect(page.locator('.member-list')).toContainText('Bob')
+
+    await ctx.close()
+  })
+})

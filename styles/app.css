@@ -277,6 +277,30 @@ img { max-width: 100%; height: auto; }
 .group-card h3 a { color: #1a1a2e; display: block; }
 .group-card h3 a:hover { text-decoration: none; color: #1a8c4e; }
 
+.group-card-body {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.group-members,
+.group-expenses {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.6;
+}
+
+.group-expenses {
+  font-weight: 600;
+  color: #1a8c4e;
+}
+
+.group-card-body .empty {
+  font-style: italic;
+  color: #aaa;
+  font-weight: 400;
+}
+
 #group-detail-area { padding-bottom: 24px; }
 
 .group-detail {

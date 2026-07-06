@@ -3,7 +3,7 @@
     <header class="group-header">
       <h2>{{group.name}}</h2>
       <p class="member-count">{{memberCount}} {{memberLabel}}</p>
-      <a href="#/" class="back-link" hx-get="{{{basePath}}}/api/groups" hx-target="#main-content" hx-push-url="/#/">&larr; Back</a>
+      <a href="#/" class="back-link" hx-get="{{{basePath}}}/api/groups" hx-target="#main-content" hx-push-url="{{{basePath}}}/#/">&larr; Back</a>
     </header>
     <nav class="group-actions">
       <button class="btn btn-primary" hx-get="{{{basePath}}}/api/groups/{{group.id}}/members/form" hx-target="#member-form-area" hx-swap="innerHTML">Add Member</button>

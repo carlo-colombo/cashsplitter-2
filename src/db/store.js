@@ -2,6 +2,12 @@ const DB_NAME = 'cashsplitter'
 const DB_VERSION = 1
 const STORE_NAME = 'events'
 
+let _seq = 0
+
+function nextSeq() {
+  return ++_seq
+}
+
 function openDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION)
@@ -33,6 +39,7 @@ export async function addEvent(event) {
     const store = tx.objectStore(STORE_NAME)
     const doc = {
       id: generateId(),
+      seq: nextSeq(),
       type: event.type,
       data: event.data,
       timestamp: new Date().toISOString(),
@@ -51,9 +58,11 @@ export async function getAllEvents() {
     const store = tx.objectStore(STORE_NAME)
     const request = store.getAll()
     request.onsuccess = () => {
-      const events = request.result.sort(
-        (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
-      )
+      const events = request.result.sort((a, b) => {
+        const tsDiff = new Date(a.timestamp) - new Date(b.timestamp)
+        if (tsDiff !== 0) return tsDiff
+        return (a.seq || 0) - (b.seq || 0)
+      })
       resolve(events)
     }
     request.onerror = () => reject(request.error)

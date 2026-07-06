@@ -44,7 +44,21 @@ function buildGroupDetailData(group, memberIds, users, expenses, balances) {
 export async function list(_params, _request) {
   const events = await getAllEvents()
   const state = projectState(events)
-  const groupsList = Object.entries(state.groups).map(([id, g]) => ({ id, name: g.name }))
+  const groupsList = Object.entries(state.groups).map(([id, g]) => {
+    const members = state.groupMembers[id] || []
+    const expenses = state.expenses[id] || []
+    const expenseCount = expenses.length
+    const expenseTotal = expenses.reduce((sum, e) => sum + e.total, 0)
+    return {
+      id,
+      name: g.name,
+      memberNames: members.map(m => m.userName).join(', '),
+      hasMembers: members.length > 0,
+      expenseCount,
+      expenseTotalFormatted: (expenseTotal / 100).toFixed(2),
+      hasExpenses: expenseCount > 0,
+    }
+  })
   const data = {
     groups: groupsList,
     hasGroups: groupsList.length > 0,
@@ -81,7 +95,7 @@ export async function create(_params, request) {
     status: 200,
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
-      'HX-Push-Url': `/#/groups/${id}`,
+      'HX-Push-Url': `${BASE_PATH}/#/groups/${id}`,
     },
   })
 }
@@ -127,7 +141,21 @@ export async function deleteGroup(params, _request) {
   // Redirect back to groups list
   const updatedEvents = await getAllEvents()
   const updatedState = projectState(updatedEvents)
-  const groupsList = Object.entries(updatedState.groups).map(([id, g]) => ({ id, name: g.name }))
+  const groupsList = Object.entries(updatedState.groups).map(([id, g]) => {
+    const members = updatedState.groupMembers[id] || []
+    const expenses = updatedState.expenses[id] || []
+    const expenseCount = expenses.length
+    const expenseTotal = expenses.reduce((sum, e) => sum + e.total, 0)
+    return {
+      id,
+      name: g.name,
+      memberNames: members.map(m => m.userName).join(', '),
+      hasMembers: members.length > 0,
+      expenseCount,
+      expenseTotalFormatted: (expenseTotal / 100).toFixed(2),
+      hasExpenses: expenseCount > 0,
+    }
+  })
   const data = {
     groups: groupsList,
     hasGroups: groupsList.length > 0,
@@ -138,7 +166,7 @@ export async function deleteGroup(params, _request) {
     status: 200,
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
-      'HX-Push-Url': '/#/',
+      'HX-Push-Url': `${BASE_PATH}/#/`,
     },
   })
 }
