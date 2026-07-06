@@ -474,7 +474,7 @@ test.describe('Homepage Group Summary', () => {
     // Verify updated expense summary (2 expenses, €50 total)
     const card = page.locator('.group-card')
     await expect(card.locator('.group-expenses')).toContainText('2')
-    await expect(card.locator('.group-expenses')).toContainText('\\u20AC50.00')
+    await expect(card.locator('.group-expenses')).toContainText('\u20AC50.00')
     await ctx.close()
   })
 })

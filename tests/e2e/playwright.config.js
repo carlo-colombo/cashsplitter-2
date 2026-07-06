@@ -9,7 +9,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: 1,
   use: {
-    baseURL: 'http://localhost:3333',
+    baseURL: 'http://localhost:3333/cashsplitter-2',
     trace: 'on-first-retry',
   },
   webServer: {
