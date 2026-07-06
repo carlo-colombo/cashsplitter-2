@@ -1,7 +1,9 @@
 export const USER_CREATED = 'USER_CREATED'
 export const GROUP_CREATED = 'GROUP_CREATED'
+export const GROUP_DELETED = 'GROUP_DELETED'
 export const MEMBER_ADDED = 'MEMBER_ADDED'
 export const EXPENSE_ADDED = 'EXPENSE_ADDED'
+export const EXPENSE_DELETED = 'EXPENSE_DELETED'
 export const PAYMENT_MADE = 'PAYMENT_MADE'
 export const LEDGER_ENTRY = 'LEDGER_ENTRY'
 
@@ -24,6 +26,19 @@ export function projectState(events) {
     balances: {},
   }
 
+  const deletedGroups = new Set()
+  const deletedExpenses = new Set()
+
+  // First pass: collect all deletion markers
+  for (const event of events) {
+    if (event.type === GROUP_DELETED) {
+      deletedGroups.add(event.data.groupId)
+    }
+    if (event.type === EXPENSE_DELETED) {
+      deletedExpenses.add(event.data.expenseId)
+    }
+  }
+
   for (const event of events) {
     switch (event.type) {
       case USER_CREATED: {
@@ -33,6 +48,7 @@ export function projectState(events) {
       }
       case GROUP_CREATED: {
         const { id, name } = event.data
+        if (deletedGroups.has(id)) break // skip deleted groups
         state.groups[id] = { id, name, created: event.timestamp }
         state.members[id] = []
         state.groupMembers[id] = []
@@ -57,6 +73,7 @@ export function projectState(events) {
       }
       case EXPENSE_ADDED: {
         const { groupId, id, description, total, paidBy, split } = event.data
+        if (deletedExpenses.has(id)) break // skip deleted expenses
         if (state.expenses[groupId]) {
           state.expenses[groupId].push({
             id,
@@ -76,7 +93,9 @@ export function projectState(events) {
         break
       }
       case LEDGER_ENTRY: {
-        const { groupId, from, to, amount } = event.data
+        const { groupId, from, to, amount, expenseId } = event.data
+        // Skip ledger entries that belong to deleted expenses
+        if (expenseId && deletedExpenses.has(expenseId)) break
         if (state.balances[groupId]) {
           state.balances[groupId][from] = (state.balances[groupId][from] || 0) - amount
           state.balances[groupId][to] = (state.balances[groupId][to] || 0) + amount

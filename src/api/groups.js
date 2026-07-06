@@ -1,5 +1,5 @@
 import { addEvent, getAllEvents } from '../db/store.js'
-import { projectState, createEvent, GROUP_CREATED } from '../db/events.js'
+import { projectState, createEvent, GROUP_CREATED, GROUP_DELETED } from '../db/events.js'
 import { render } from '../lib/template.js'
 import { BASE_PATH } from '../lib/config.js'
 import { getSettlementHistory } from './settlements.js'
@@ -30,6 +30,7 @@ function buildGroupDetailData(group, memberIds, users, expenses, balances) {
     members: memberIds.map(id => ({ id, name: lookupName(users, id) })),
     hasExpenses: expenses.length > 0,
     expenses: expenses.map(e => ({
+      id: e.id,
       description: e.description,
       totalFormatted: (e.total / 100).toFixed(2),
       payerNames: formatPayerNames(e.paidBy, users)
@@ -108,5 +109,36 @@ export async function detail(params, _request) {
   const html = render('group-detail', data)
   return new Response(html, {
     headers: { 'Content-Type': 'text/html; charset=utf-8' },
+  })
+}
+
+export async function deleteGroup(params, _request) {
+  const groupId = params.id
+  const events = await getAllEvents()
+  const state = projectState(events)
+  if (!state.groups[groupId]) {
+    return new Response('<div class="error">Group not found</div>', {
+      status: 404,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    })
+  }
+  // Append immutable deletion event
+  await addEvent(createEvent(GROUP_DELETED, { groupId }))
+  // Redirect back to groups list
+  const updatedEvents = await getAllEvents()
+  const updatedState = projectState(updatedEvents)
+  const groupsList = Object.entries(updatedState.groups).map(([id, g]) => ({ id, name: g.name }))
+  const data = {
+    groups: groupsList,
+    hasGroups: groupsList.length > 0,
+    basePath: BASE_PATH,
+  }
+  const html = render('groups-list', data)
+  return new Response(html, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'HX-Push-Url': '/#/',
+    },
   })
 }

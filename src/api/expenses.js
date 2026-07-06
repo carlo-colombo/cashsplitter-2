@@ -1,5 +1,5 @@
 import { addEvent, getAllEvents } from '../db/store.js'
-import { projectState, createEvent, EXPENSE_ADDED, LEDGER_ENTRY } from '../db/events.js'
+import { projectState, createEvent, EXPENSE_ADDED, EXPENSE_DELETED, LEDGER_ENTRY } from '../db/events.js'
 import { splitEqual, splitByShares, splitCustom, validateCustomTotal } from '../lib/split.js'
 import { render } from '../lib/template.js'
 import { BASE_PATH } from '../lib/config.js'
@@ -31,6 +31,7 @@ function buildGroupDetailData(group, memberIds, users, expenses, balances) {
     members: memberIds.map(id => ({ id, name: lookupName(users, id) })),
     hasExpenses: expenses.length > 0,
     expenses: expenses.map(e => ({
+      id: e.id,
       description: e.description,
       totalFormatted: (e.total / 100).toFixed(2),
       payerNames: formatPayerNames(e.paidBy, users)
@@ -204,6 +205,48 @@ export async function add(params, request) {
     await addEvent(createEvent(LEDGER_ENTRY, entry))
   }
 
+  const updatedEvents = await getAllEvents()
+  const updatedState = projectState(updatedEvents)
+  const settlementHistory = getSettlementHistory(updatedEvents, groupId, updatedState.users)
+  const data = {
+    ...buildGroupDetailData(
+      updatedState.groups[groupId],
+      updatedState.members[groupId] || [],
+      updatedState.users,
+      updatedState.expenses[groupId] || [],
+      updatedState.balances[groupId] || {}
+    ),
+    hasSettlementHistory: settlementHistory.length > 0,
+    settlementHistory,
+  }
+  const html = render('group-detail', data)
+  return new Response(html, {
+    headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    status: 200,
+  })
+}
+
+export async function deleteExpense(params, _request) {
+  const groupId = params.id
+  const expenseId = params.expenseId
+  const events = await getAllEvents()
+  const state = projectState(events)
+  if (!state.groups[groupId]) {
+    return new Response('<div class="error">Group not found</div>', {
+      status: 404,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    })
+  }
+  const expenseExists = (state.expenses[groupId] || []).some(e => e.id === expenseId)
+  if (!expenseExists) {
+    return new Response('<div class="error">Expense not found</div>', {
+      status: 404,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    })
+  }
+  // Append immutable deletion event
+  await addEvent(createEvent(EXPENSE_DELETED, { groupId, expenseId }))
+  // Re-render group detail
   const updatedEvents = await getAllEvents()
   const updatedState = projectState(updatedEvents)
   const settlementHistory = getSettlementHistory(updatedEvents, groupId, updatedState.users)

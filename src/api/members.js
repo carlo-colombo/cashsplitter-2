@@ -30,6 +30,7 @@ function buildGroupDetailData(group, memberIds, users, expenses, balances) {
     members: memberIds.map(id => ({ id, name: lookupName(users, id) })),
     hasExpenses: expenses.length > 0,
     expenses: expenses.map(e => ({
+      id: e.id,
       description: e.description,
       totalFormatted: (e.total / 100).toFixed(2),
       payerNames: formatPayerNames(e.paidBy, users)

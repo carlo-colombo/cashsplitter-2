@@ -31,7 +31,10 @@
       {{#if hasExpenses}}
       <ul class="expense-list">
         {{#each expenses}}
-        <li><strong>{{this.description}}</strong> &mdash; &euro;{{this.totalFormatted}} paid by {{this.payerNames}}</li>
+        <li class="expense-item">
+          <span class="expense-info"><strong>{{this.description}}</strong> &mdash; &euro;{{this.totalFormatted}} paid by {{this.payerNames}}</span>
+          <button class="btn btn-danger btn-sm btn-icon" hx-post="{{{basePath}}}/api/groups/{{group.id}}/expenses/{{this.id}}/delete" hx-target="#group-detail-area" hx-swap="outerHTML" hx-confirm="Delete this expense? It will be removed from balances.">&times;</button>
+        </li>
         {{/each}}
       </ul>
       {{else}}

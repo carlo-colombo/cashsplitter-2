@@ -17,6 +17,8 @@ const routes = [
   { method: 'GET', pattern: new URLPattern({ pathname: BASE_PATH + '/api/groups/:id/settlements' }), handler: balances.settlements },
   { method: 'GET', pattern: new URLPattern({ pathname: BASE_PATH + '/api/groups/:id/settlements/form' }), handler: settlements.form },
   { method: 'POST', pattern: new URLPattern({ pathname: BASE_PATH + '/api/groups/:id/settlements' }), handler: settlements.create },
+  { method: 'POST', pattern: new URLPattern({ pathname: BASE_PATH + '/api/groups/:id/delete' }), handler: groups.deleteGroup },
+  { method: 'POST', pattern: new URLPattern({ pathname: BASE_PATH + '/api/groups/:id/expenses/:expenseId/delete' }), handler: expenses.deleteExpense },
 ]
 
 export async function handleRequest(request) {

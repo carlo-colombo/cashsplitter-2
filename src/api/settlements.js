@@ -134,6 +134,7 @@ export async function create(params, request) {
     members: memberIdsList.map(id => ({ id, name: lookupName(updatedState.users, id) })),
     hasExpenses: expenses.length > 0,
     expenses: expenses.map(e => ({
+      id: e.id,
       description: e.description,
       totalFormatted: (e.total / 100).toFixed(2),
       payerNames: Object.entries(e.paidBy).map(([id, amt]) => `${lookupName(updatedState.users, id)} (€${(amt / 100).toFixed(2)})`).join(', '),

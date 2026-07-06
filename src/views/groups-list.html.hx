@@ -10,7 +10,10 @@
   <div class="groups-list">
     {{#each groups}}
     <div class="group-card">
-      <h3><a href="#/groups/{{this.id}}" hx-get="{{{basePath}}}/api/groups/{{this.id}}" hx-target="#main-content" hx-push-url="/#/groups/{{this.id}}">{{this.name}}</a></h3>
+      <div class="group-card-header">
+        <h3><a href="#/groups/{{this.id}}" hx-get="{{{basePath}}}/api/groups/{{this.id}}" hx-target="#main-content" hx-push-url="/#/groups/{{this.id}}">{{this.name}}</a></h3>
+        <button class="btn btn-danger btn-sm" hx-post="{{{basePath}}}/api/groups/{{this.id}}/delete" hx-target="#main-content" hx-swap="innerHTML" hx-confirm="Delete this group and all its data? This cannot be undone.">&times;</button>
+      </div>
     </div>
     {{/each}}
   </div>
